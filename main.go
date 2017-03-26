@@ -55,6 +55,7 @@ func main() {
 	}
 
 	var path []*Edge
+	var initialEdge *Edge
 	fmt.Println(g)
 	fmt.Println("positivos", g.positiveEdges)
 
@@ -62,17 +63,27 @@ func main() {
 	// Check if deposit (1) in T
 	// If no positive edge adjacent to deposit, select max benefit-cost from E
 	if !inPositiveEdges(pEdges, 1) {
-		var maxEdge *Edge
 		max := (math.MaxInt32 - 1) * -1
 		for _, node := range g.Neighbors(1) {
-			if g.Benefit(1, node)-g.Benefit(1, node) > max {
-				max = g.Benefit(1, node) - g.Benefit(1, node)
-				maxEdge = g.edges[1][node]
+			if g.Benefit(1, node)-g.Cost(1, node) > max {
+				max = g.Benefit(1, node) - g.Cost(1, node)
+				initialEdge = g.edges[1][node]
 			}
 		}
-		pEdges = append(pEdges, maxEdge)
+	} else {
+		// Select first positive edge from depot
+		for index, edge := range pEdges {
+			if edge.start == 1 {
+				initialEdge = edge
+				pEdges = append(pEdges[:index], pEdges[index+1:]...) // Delete Edge from list
+				break
+			}
+		}
 	}
-	b := 1
+
+	// Set depot initial edge
+	b := initialEdge.end
+	path = append(path, initialEdge)
 	var adjEdge int
 	for len(pEdges) > 0 {
 		if inPositiveEdges(pEdges, b) {
@@ -84,18 +95,33 @@ func main() {
 			}
 			path = append(path, pEdges[adjEdge])
 			pEdges = append(pEdges[:adjEdge], pEdges[adjEdge+1:]...) // Delete Edge from list
-			// fmt.Println(path)
-			// fmt.Println(pEdges)
+			fmt.Println("Selected b: ", b)
+			fmt.Println("Path: ", path)
+			fmt.Println("pEdges:", pEdges)
 		} else {
+			fmt.Println("no pEdges use minimum cost b=", b)
 			ccm := make([][]*Edge, 0)
 			for _, edge := range pEdges {
-
 				ccm = append(ccm, g.Dijkstra(edge.start, b, path))
 				ccm = append(ccm, g.Dijkstra(edge.end, b, path))
 			}
-			fmt.Println("pEdges", pEdges, "b=", b)
-			fmt.Println(getPath(ccm))
-			break
+			cmib := getPath(ccm)         // Probabilistic selection of the path
+			path = append(path, cmib...) // Append random selected path to cycle
+			// Remove edges from
+			fmt.Println(pEdges)
+			fmt.Println("cmib: ", cmib)
+			fmt.Println("path ", path)
+			// Remove cmib from pEdges
+			for index, elem1 := range pEdges {
+				for _, elem2 := range path {
+					if (elem1.start == elem2.start && elem1.end == elem2.end) ||
+						(elem1.end == elem2.start && elem1.start == elem2.end) {
+						pEdges = append(pEdges[:index], pEdges[index+1:]...) // Delete Edge from list
+					}
+				}
+			}
+			fmt.Println("pEdges ", pEdges)
+			b = path[len(path)-1].end
 		}
 	}
 }
@@ -111,21 +137,24 @@ func inPositiveEdges(positiveEdges []*Edge, node int) bool {
 
 // Select randomly an Edge with probability: benefit-cost/total(benefit-cost)
 func getEdge(positiveEdges []*Edge, b int) int {
-	var adjEdges []*Edge
-	for _, edge := range positiveEdges {
-		if edge.start == b || edge.end == b {
-			adjEdges = append(adjEdges, edge)
-		}
-	}
-
 	rand.Seed(time.Now().UTC().UnixNano())
 	wc := new(wc.WeightedChoice)
-	weights := make([]int, len(adjEdges))
-	for index, elem := range adjEdges {
+	weights := make([]int, len(positiveEdges))
+	// Construct weight array
+	for index, elem := range positiveEdges {
 		weights[index] = elem.benefit - elem.cost
+		if weights[index] == 0 {
+			weights[index] = 1
+		}
 	}
 	wc.Weights = weights
 	random := wc.BinarySearch().(int)
+	edge := positiveEdges[random]
+	for edge.start != b && edge.end != b {
+		rand.Seed(time.Now().UTC().UnixNano())
+		random = wc.BinarySearch().(int)
+		edge = positiveEdges[random]
+	}
 	// fmt.Printf("result: %s %d\n", adjEdges[random], weights[random])
 	// fmt.Println(positiveEdges, "hola")
 	return random
@@ -157,7 +186,10 @@ func getPath(ccm [][]*Edge) []*Edge {
 		if pathCost[i] > 0 {
 			pathCost[i] = pathCost[i] * int(math.Abs(float64(min)))
 		} else {
-			pathCost[i] = pathCost[i] + int(math.Abs(float64(min))) + 1
+			pathCost[i] = pathCost[i] + int(math.Abs(float64(min)))
+		}
+		if pathCost[i] == 0 {
+			pathCost[i] = 1
 		}
 	}
 

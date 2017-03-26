@@ -117,14 +117,14 @@ func (g *Graph) Dijkstra(source int, to int, path []*Edge) []*Edge {
 
 		// Calculate minimum edge distance
 		for _, edge := range g.edges[u] {
-			// if dist[edge.end] > dist[u]+costMinimumPath(edge, path) {
-			// 	dist[edge.end] = dist[u] + costMinimumPath(edge, path)
-			// 	prev[edge.end] = u
-			// }
-			if dist[edge.end] > dist[u]+edge.cost {
-				dist[edge.end] = dist[u] + edge.cost
+			if dist[edge.end] > dist[u]+costMinimumPath(edge, path) {
+				dist[edge.end] = dist[u] + costMinimumPath(edge, path)
 				prev[edge.end] = u
 			}
+			// if dist[edge.end] > dist[u]+edge.cost {
+			// 	dist[edge.end] = dist[u] + edge.cost
+			// 	prev[edge.end] = u
+			// }
 		}
 	}
 	return g.reconstructPath(source, to, prev)
@@ -134,7 +134,6 @@ func (g *Graph) reconstructPath(from int, to int, prev []int) []*Edge {
 	var path []*Edge
 	next := to
 	for next != from {
-
 		path = append(path, g.edges[next][prev[next]])
 		next = prev[next]
 	}
