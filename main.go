@@ -33,7 +33,8 @@ func main() {
 	// fmt.Println("Node 2 Degree", g.Degree(2))
 	// fmt.Println("Node 5 Degree", g.Degree(5))
 
-	file, _ := os.Open("./instanciasPRPP/CHRISTOFIDES/P02NoRPP")
+	file, _ := os.Open("./instanciasPRPP/CHRISTOFIDES/P01NoRPP")
+	//file, _ := os.Open("./instanciasPRPP/RANDOM/R5NoRPP")
 	lineScanner := bufio.NewScanner(file)
 	line := 0
 	g := NewGraph(1)
@@ -86,10 +87,10 @@ func main() {
 			fmt.Println(path)
 			fmt.Println(pEdges)
 		} else {
-
+			break
 		}
 	}
-	getEdge(pEdges, 3)
+	fmt.Println(g.Dijkstra(1, 11, path))
 }
 
 func inPositiveEdges(positiveEdges []*Edge, node int) bool {

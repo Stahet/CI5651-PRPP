@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"math"
 	"sort"
 )
 
@@ -83,6 +84,76 @@ func (g *Graph) Neighbors(node int) []int {
 		neighbors = append(neighbors, k)
 	}
 	return neighbors
+}
+
+func (g *Graph) Dijkstra(source int, to int, path []*Edge) []*Edge {
+	// Create map to track distances from source vertex
+	var u int
+	dist := make(map[int]int)
+	seen := make(map[int]bool)
+	prev := make([]int, len(g.edges)+1)
+
+	// Distance from source to source is zero
+	dist[source] = 0
+
+	// Initalize all distances to maximum
+	for index, _ := range g.edges {
+		if index != source {
+			dist[index] = math.MaxInt32
+		}
+	}
+
+	// Iterate over all vertices
+	for len(seen) < len(g.edges) {
+		// Find vertex with minimum distance
+		min := math.MaxInt32
+		for index, _ := range g.edges {
+			if _, ok := seen[index]; dist[index] < min && !ok {
+				min = dist[index]
+				u = index
+			}
+		}
+		seen[u] = true
+
+		// Calculate minimum edge distance
+		for _, edge := range g.edges[u] {
+			// if dist[edge.end] > dist[u]+costMinimumPath(edge, path) {
+			// 	dist[edge.end] = dist[u] + costMinimumPath(edge, path)
+			// 	prev[edge.end] = u
+			// }
+			if dist[edge.end] > dist[u]+edge.cost {
+				dist[edge.end] = dist[u] + edge.cost
+				prev[edge.end] = u
+			}
+		}
+		fmt.Println(dist)
+		fmt.Println(prev)
+	}
+	return g.reconstructPath(source, to, prev)
+}
+
+func (g *Graph) reconstructPath(from int, to int, prev []int) []*Edge {
+	var path []*Edge
+	next := to
+	fmt.Println(next)
+	for next != from {
+
+		path = append(path, g.edges[next][prev[next]])
+		next = prev[next]
+	}
+	return path
+}
+
+func costMinimumPath(edge *Edge, path []*Edge) int {
+	for _, elem := range path {
+		if edge == elem {
+			return edge.cost
+		}
+	}
+	if edge.benefit-edge.cost < 0 {
+		return (edge.benefit - edge.cost) * (-1)
+	}
+	return 0
 }
 
 func (g *Graph) Degree(node int) int {
