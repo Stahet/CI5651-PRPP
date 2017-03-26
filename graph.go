@@ -126,8 +126,6 @@ func (g *Graph) Dijkstra(source int, to int, path []*Edge) []*Edge {
 				prev[edge.end] = u
 			}
 		}
-		fmt.Println(dist)
-		fmt.Println(prev)
 	}
 	return g.reconstructPath(source, to, prev)
 }
@@ -135,7 +133,6 @@ func (g *Graph) Dijkstra(source int, to int, path []*Edge) []*Edge {
 func (g *Graph) reconstructPath(from int, to int, prev []int) []*Edge {
 	var path []*Edge
 	next := to
-	fmt.Println(next)
 	for next != from {
 
 		path = append(path, g.edges[next][prev[next]])
