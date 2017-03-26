@@ -4,6 +4,7 @@ import (
 	wc "./weightedchoice"
 	"bufio"
 	"fmt"
+	"math"
 	"math/rand"
 	"os"
 	"strconv"
@@ -52,9 +53,8 @@ func main() {
 		line++
 	}
 
-	var path []int
-	path = append(path, 1)
-	//fmt.Println(g)
+	var path []*Edge
+	fmt.Println(g)
 	fmt.Println("positivos", g.positiveEdges)
 
 	pEdges := g.positiveEdges
@@ -62,7 +62,7 @@ func main() {
 	// If no positive edge adjacent to deposit, select max benefit-cost from E
 	if !inPositiveEdges(pEdges, 1) {
 		var maxEdge *Edge
-		max := -99999999
+		max := (math.MaxInt32 - 1) * -1
 		for _, node := range g.Neighbors(1) {
 			if g.Benefit(1, node)-g.Benefit(1, node) > max {
 				max = g.Benefit(1, node) - g.Benefit(1, node)
@@ -75,17 +75,18 @@ func main() {
 	var adjEdge int
 	for len(pEdges) > 0 {
 		if inPositiveEdges(pEdges, b) {
-			adjEdge = getEdge(pEdges, b)
+			adjEdge = getEdge(pEdges, b) // Get Edge position adjacent to node g
 			if pEdges[adjEdge].start == b {
 				b = pEdges[adjEdge].end
-				path = append(path, b)
 			} else if pEdges[adjEdge].end == b {
 				b = pEdges[adjEdge].start
-				path = append(path, b)
 			}
-			fmt.Println("delete: ", pEdges[adjEdge], pEdges)
-			pEdges = append(pEdges[:adjEdge], pEdges[adjEdge+1:]...)
+			path = append(path, pEdges[adjEdge])
+			pEdges = append(pEdges[:adjEdge], pEdges[adjEdge+1:]...) // Delete Edge from list
 			fmt.Println(path)
+			fmt.Println(pEdges)
+		} else {
+
 		}
 	}
 	getEdge(pEdges, 3)
