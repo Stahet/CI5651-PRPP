@@ -14,7 +14,8 @@ type Edge struct {
 }
 
 type Graph struct {
-	edges map[int]map[int]*Edge
+	edges         map[int]map[int]*Edge
+	positiveEdges []*Edge
 }
 
 func (e *Edge) String() string {
@@ -52,6 +53,10 @@ func (g *Graph) AddEdge(start, end, cost, benefit int) {
 		g.edges[end][start].ocurr = g.edges[end][start].ocurr + 1
 	} else {
 		g.edges[end][start] = &Edge{end, start, cost, benefit, 1}
+	}
+
+	if benefit-cost >= 0 {
+		g.positiveEdges = append(g.positiveEdges, g.edges[start][end])
 	}
 }
 
@@ -93,7 +98,7 @@ func (g *Graph) Benefit(start, end int) int {
 }
 
 func NewGraph(nodes int) *Graph {
-	g := &Graph{make(map[int]map[int]*Edge)}
+	g := &Graph{make(map[int]map[int]*Edge), make([]*Edge, 0)}
 	for i := 1; i <= nodes; i++ {
 		tmap := make(map[int]*Edge)
 		g.edges[i] = tmap
