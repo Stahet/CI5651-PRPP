@@ -1,7 +1,6 @@
 package main
 
 import (
-	wc "./weightedchoice"
 	"bufio"
 	"fmt"
 	"math"
@@ -10,6 +9,8 @@ import (
 	"strconv"
 	"strings"
 	"time"
+
+	wc "./weightedchoice"
 )
 
 func main() {
@@ -85,9 +86,8 @@ func main() {
 			cmib := getPath(ccm)         // Probabilistic selection of the path
 			path = append(path, cmib...) // Append random selected path to cycle
 			// Remove cmib from pEdges
-			i := 0
 			for _, elem := range path {
-				i = 0
+				i := 0
 				for i < len(pEdges) {
 					if (elem.start == pEdges[i].start && elem.end == pEdges[i].end) ||
 						(elem.end == pEdges[i].start && elem.start == pEdges[i].end) {
@@ -189,4 +189,16 @@ func getPath(ccm [][]*Edge) []*Edge {
 	wc.Weights = pathCost             // Assign an array position a weight according to cost
 	random := wc.BinarySearch().(int) // Random select an array position
 	return ccm[random]
+}
+
+func beneficio(solucion []*Edge) int {
+	total := 0
+	for _, edge := range solucion {
+		if edge.ocurr > 0 {
+			total = total - edge.cost
+		} else {
+			total = total + edge.benefit - edge.cost
+		}
+	}
+	return total
 }

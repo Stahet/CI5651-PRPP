@@ -6,6 +6,7 @@ import (
 	"sort"
 )
 
+// Edge Type
 type Edge struct {
 	start   int
 	end     int
@@ -14,6 +15,7 @@ type Edge struct {
 	ocurr   int
 }
 
+// Graph Type
 type Graph struct {
 	edges         map[int]map[int]*Edge
 	positiveEdges []*Edge
@@ -27,7 +29,7 @@ func (g *Graph) String() string {
 	s := ""
 	keys := make([]int, len(g.edges))
 	i := 0
-	for k, _ := range g.edges {
+	for k := range g.edges {
 		keys[i] = k
 		i++
 	}
@@ -42,6 +44,7 @@ func (g *Graph) String() string {
 	return s
 }
 
+// AddEdge function to ad edges to a graph
 func (g *Graph) AddEdge(start, end, cost, benefit int) {
 
 	if _, ok := g.edges[start][end]; ok {
@@ -61,6 +64,7 @@ func (g *Graph) AddEdge(start, end, cost, benefit int) {
 	}
 }
 
+// RemoveEdge function to remove edge from a graph
 func (g *Graph) RemoveEdge(start, end int) {
 	if _, ok := g.edges[start][end]; ok {
 		if g.edges[start][end].ocurr <= 1 {
@@ -78,19 +82,22 @@ func (g *Graph) RemoveEdge(start, end int) {
 	}
 }
 
+// Neighbors function to return Neigbors of node
 func (g *Graph) Neighbors(node int) []int {
 	neighbors := make([]int, 0, len(g.edges[node]))
-	for k, _ := range g.edges[node] {
+	for k := range g.edges[node] {
 		neighbors = append(neighbors, k)
 	}
 	return neighbors
 }
 
+// AddOcurr function to add ocurrence to an edge
 func (g *Graph) AddOcurr(start, end int) {
 	g.edges[start][end].ocurr = g.edges[start][end].ocurr + 1
 	g.edges[end][start].ocurr = g.edges[end][start].ocurr + 1
 }
 
+// Dijkstra algorithm
 func (g *Graph) Dijkstra(source int, to int, path []*Edge) []*Edge {
 	// Create map to track distances from source vertex
 	var u int
@@ -102,7 +109,7 @@ func (g *Graph) Dijkstra(source int, to int, path []*Edge) []*Edge {
 	dist[source] = 0
 
 	// Initalize all distances to maximum
-	for index, _ := range g.edges {
+	for index := range g.edges {
 		if index != source {
 			dist[index] = math.MaxInt32
 		}
@@ -112,7 +119,7 @@ func (g *Graph) Dijkstra(source int, to int, path []*Edge) []*Edge {
 	for len(seen) < len(g.edges) {
 		// Find vertex with minimum distance
 		min := math.MaxInt32
-		for index, _ := range g.edges {
+		for index := range g.edges {
 			if _, ok := seen[index]; dist[index] < min && !ok {
 				min = dist[index]
 				u = index
@@ -157,18 +164,81 @@ func costMinimumPath(edge *Edge, path []*Edge) int {
 	return 0
 }
 
+// Degree function to return the incidence degree of a node
 func (g *Graph) Degree(node int) int {
 	return len(g.edges[node])
 }
 
+// Cost function to return the cost of an edge
 func (g *Graph) Cost(start, end int) int {
 	return g.edges[start][end].cost
 }
 
+// Benefit function to return the benefit of an edge
 func (g *Graph) Benefit(start, end int) int {
 	return g.edges[start][end].benefit
 }
 
+func (g *Graph) estaEnSolucionParcial(e *Edge) bool {
+	if !(g.edges[e.start][e.end] == nil) {
+		return false
+	} else if g.edges[e.start][e.end].ocurr == 1 {
+		if g.edges[e.start][e.end].benefit == 0 {
+			return false
+		}
+		return true
+	} else {
+		return true
+	}
+}
+
+// func (g *Graph) cumpleAcotamiento(e Edge, mejorSol *Graph) bool {
+// 	beneficioE := e.benefit - e.cost
+// 	beneficioSolParcial := beneficio(g) + beneficioE
+// 	maxBeneficio := beneficioDisponible - max(0, beneficioE) + beneficioSolParcial
+// 	if maxBeneficio <= beneficio(mejorSol) {
+// 		return false
+// 	} else {
+// 		return true
+// 	}
+// }
+
+func (g *Graph) branchAndBound(e *Edge, path []*Edge) {
+	if e.end == 1 {
+		if beneficio(path) > beneficio(mejorSol) {
+			mejorSol = path
+		}
+	}
+	sucesores := g.Neighbors(e.end)
+	for _, edge := range sucesores {
+		if verifyConditions(edge) {
+			// g.AddEdge(edge, solParcial)
+			beneficioDisponible = beneficioDisponible - math.Max(0, edge.benefit-edge.cost)
+			g.branchAndBound()
+		}
+		// edge = eliminarUltimoLado(solParcial)
+		beneficioDisponible = beneficioDisponible - math.Max(0, edge.benefit-edge.cost)
+	}
+}
+
+func (g *Graph) checkNegativeCycle(e *Edge) bool {
+	if g.edges[e.end] {
+		// totalBenefit := e.benefit - e.cost
+		for i := len(g.edges); i > 0; i-- {
+			if solution[i].start == e.end {
+				break
+			} else {
+				// totalBenefit = totalbenefit + solution[i].benefit - solution[i].cost
+			}
+		}
+	}
+	if totalBenefit < 0 {
+		return true
+	}
+	return false
+}
+
+// NewGraph function to create a new graph
 func NewGraph(nodes int) *Graph {
 	g := &Graph{make(map[int]map[int]*Edge), make([]*Edge, 0)}
 	for i := 1; i <= nodes; i++ {
