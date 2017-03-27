@@ -14,27 +14,8 @@ import (
 
 func main() {
 
-	// g := NewGraph(5)
-	// g.AddEdge(1, 2, 10, 4)
-	// g.AddEdge(4, 2, 10, 4)
-	// g.AddEdge(3, 2, 4, 80)
-	// g.AddEdge(3, 4, 7, 9)
-	// g.AddEdge(3, 4, 7, 9)
-	// g.AddEdge(4, 3, 7, 4)
-	// fmt.Println(g)
-	// // g.RemoveEdge(2, 1)
-	// // g.RemoveEdge(3, 4)
-	// // g.RemoveEdge(4, 3)
-	// // g.RemoveEdge(3, 4)
-	// // fmt.Println(g)
-	// fmt.Println(g.Neighbors(2))
-	// fmt.Println("4-3Cost ", g.Cost(4, 3), "Benefit ", g.Benefit(3, 4))
-	// fmt.Println("1-2Cost", g.Cost(1, 2), "Benefit ", g.Benefit(2, 1))
-	// fmt.Println("Node 2 Degree", g.Degree(2))
-	// fmt.Println("Node 5 Degree", g.Degree(5))
-
-	file, _ := os.Open("./instanciasPRPP/CHRISTOFIDES/P01NoRPP")
-	//file, _ := os.Open("./instanciasPRPP/RANDOM/R5NoRPP")
+	file, _ := os.Open("./instanciasPRPP/CHRISTOFIDES/P02NoRPP")
+	//file, _ := os.Open("./instanciasPRPP/RANDOM/R0NoRPP")
 	lineScanner := bufio.NewScanner(file)
 	line := 0
 	g := NewGraph(1)
@@ -95,10 +76,7 @@ func main() {
 			}
 			path = append(path, pEdges[adjEdge])
 			pEdges = append(pEdges[:adjEdge], pEdges[adjEdge+1:]...) // Delete Edge from list
-			fmt.Println("Selected b: ", b)
-			fmt.Println("pEdges:", pEdges)
 		} else {
-			fmt.Println("no pEdges use minimum cost b=", b)
 			ccm := make([][]*Edge, 0)
 			for _, edge := range pEdges {
 				ccm = append(ccm, g.Dijkstra(edge.start, b, path))
@@ -106,8 +84,6 @@ func main() {
 			}
 			cmib := getPath(ccm)         // Probabilistic selection of the path
 			path = append(path, cmib...) // Append random selected path to cycle
-			// Remove edges from
-			fmt.Println("pEdges: ", pEdges)
 			// Remove cmib from pEdges
 			i := 0
 			for _, elem := range path {
@@ -121,7 +97,6 @@ func main() {
 					i = i + 1
 				}
 			}
-			fmt.Println("pEdges ", pEdges)
 			b = path[len(path)-1].end
 		}
 	}
@@ -129,11 +104,16 @@ func main() {
 		minPath := g.Dijkstra(1, path[len(path)-1].end, path)
 		path = append(path, minPath...)
 	}
-	fmt.Println(path)
 	total := 0
 	for i := 0; i < len(path); i++ {
-		total = total + path[i].benefit - path[i].cost
+		if path[i].ocurr <= 1 {
+			total = total + path[i].benefit - path[i].cost
+		} else {
+			total = total - path[i].cost
+		}
+		path[i].ocurr = path[i].ocurr + 1
 	}
+	fmt.Println("Ciclo: ", path)
 	fmt.Println(total)
 }
 
@@ -166,8 +146,6 @@ func getEdge(positiveEdges []*Edge, b int) int {
 		random = wc.BinarySearch().(int)
 		edge = positiveEdges[random]
 	}
-	// fmt.Printf("result: %s %d\n", adjEdges[random], weights[random])
-	// fmt.Println(positiveEdges, "hola")
 	return random
 }
 
