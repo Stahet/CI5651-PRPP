@@ -33,7 +33,7 @@ func main() {
 	// fmt.Println("Node 2 Degree", g.Degree(2))
 	// fmt.Println("Node 5 Degree", g.Degree(5))
 
-	file, _ := os.Open("./instanciasPRPP/CHRISTOFIDES/P01NoRPP")
+	file, _ := os.Open("./instanciasPRPP/CHRISTOFIDES/P10NoRPP")
 	//file, _ := os.Open("./instanciasPRPP/RANDOM/R5NoRPP")
 	lineScanner := bufio.NewScanner(file)
 	line := 0
@@ -96,7 +96,6 @@ func main() {
 			path = append(path, pEdges[adjEdge])
 			pEdges = append(pEdges[:adjEdge], pEdges[adjEdge+1:]...) // Delete Edge from list
 			fmt.Println("Selected b: ", b)
-			fmt.Println("Path: ", path)
 			fmt.Println("pEdges:", pEdges)
 		} else {
 			fmt.Println("no pEdges use minimum cost b=", b)
@@ -108,16 +107,18 @@ func main() {
 			cmib := getPath(ccm)         // Probabilistic selection of the path
 			path = append(path, cmib...) // Append random selected path to cycle
 			// Remove edges from
-			fmt.Println(pEdges)
-			fmt.Println("cmib: ", cmib)
-			fmt.Println("path ", path)
+			fmt.Println("pEdges: ", pEdges)
 			// Remove cmib from pEdges
-			for index, elem1 := range pEdges {
-				for _, elem2 := range path {
-					if (elem1.start == elem2.start && elem1.end == elem2.end) ||
-						(elem1.end == elem2.start && elem1.start == elem2.end) {
-						pEdges = append(pEdges[:index], pEdges[index+1:]...) // Delete Edge from list
+			i := 0
+			for _, elem := range path {
+				i = 0
+				for i < len(pEdges) {
+					if (elem.start == pEdges[i].start && elem.end == pEdges[i].end) ||
+						(elem.end == pEdges[i].start && elem.start == pEdges[i].end) {
+						pEdges = append(pEdges[:i], pEdges[i+1:]...) // Delete Edge from list
+						break
 					}
+					i = i + 1
 				}
 			}
 			fmt.Println("pEdges ", pEdges)
