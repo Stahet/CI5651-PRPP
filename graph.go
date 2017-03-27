@@ -86,6 +86,11 @@ func (g *Graph) Neighbors(node int) []int {
 	return neighbors
 }
 
+func (g *Graph) AddOcurr(start, end int) {
+	g.edges[start][end].ocurr = g.edges[start][end].ocurr + 1
+	g.edges[end][start].ocurr = g.edges[end][start].ocurr + 1
+}
+
 func (g *Graph) Dijkstra(source int, to int, path []*Edge) []*Edge {
 	// Create map to track distances from source vertex
 	var u int

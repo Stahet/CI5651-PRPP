@@ -14,7 +14,7 @@ import (
 
 func main() {
 
-	file, _ := os.Open("./instanciasPRPP/CHRISTOFIDES/P02NoRPP")
+	file, _ := os.Open("./instanciasPRPP/CHRISTOFIDES/P15NoRPP")
 	//file, _ := os.Open("./instanciasPRPP/RANDOM/R0NoRPP")
 	lineScanner := bufio.NewScanner(file)
 	line := 0
@@ -108,10 +108,12 @@ func main() {
 	for i := 0; i < len(path); i++ {
 		if path[i].ocurr <= 1 {
 			total = total + path[i].benefit - path[i].cost
+			fmt.Println("nuevo   ", path[i])
 		} else {
 			total = total - path[i].cost
+			fmt.Println("repetido", path[i])
 		}
-		path[i].ocurr = path[i].ocurr + 1
+		g.AddOcurr(path[i].start, path[i].end)
 	}
 	fmt.Println("Ciclo: ", path)
 	fmt.Println(total)
