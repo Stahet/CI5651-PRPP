@@ -15,8 +15,8 @@ import (
 
 func main() {
 
-	file, _ := os.Open("./instanciasPRPP/CHRISTOFIDES/P01NoRPP")
-	//file, _ := os.Open("./instanciasPRPP/RANDOM/R0NoRPP")
+	file, _ := os.Open("./instanciasPRPP/CHRISTOFIDES/P02NoRPP")
+	//file, _ := os.Open("./instanciasPRPP/RANDOM/R3NoRPP")
 	lineScanner := bufio.NewScanner(file)
 	line := 0
 	g := NewGraph(1)
@@ -40,7 +40,7 @@ func main() {
 	path = getCycleGRASP(g)
 	total := 0
 	for _, edge := range path {
-		if edge.ocurr <= 1 {
+		if edge.ocurr <= 0 {
 			total = total + edge.benefit - edge.cost
 			fmt.Println("nuevo   ", edge, "total: ", total)
 		} else {
@@ -52,6 +52,20 @@ func main() {
 	fmt.Println("Ciclo: ", path)
 	fmt.Println(total)
 }
+
+// Remove negative cycle from a solution
+// func removeNegativeCycle(cycle []*Edge) {
+// 	i, j := 0, 0
+// 	var e1 *Edge
+// 	var e2 *Edge
+// 	for i := 0; i < len(cycle); i++ {
+// 		e1 = cycle[i+1]
+// 		for j := i + 1; j < len(cycle); j++ {
+// 			e2 = cycle[j]
+// 			if (e1.start == e2.end)
+// 		}
+// 	}
+// }
 
 // Get a initial solution using GRASP based Algorithm
 func getCycleGRASP(g *Graph) []*Edge {
@@ -93,13 +107,15 @@ func getCycleGRASP(g *Graph) []*Edge {
 			adjEdge = getEdge(pEdges, b) // Get Edge position adjacent to node g
 			if pEdges[adjEdge].start == b {
 				b = pEdges[adjEdge].end
+				path = append(path, g.edges[pEdges[adjEdge].start][b])
 			} else if pEdges[adjEdge].end == b {
 				b = pEdges[adjEdge].start
+				path = append(path, g.edges[pEdges[adjEdge].end][b])
 			}
 			fmt.Println("Lado positivo aleatorio seleccionado", pEdges[adjEdge])
-			path = append(path, pEdges[adjEdge])
 			pEdges = append(pEdges[:adjEdge], pEdges[adjEdge+1:]...) // Delete Edge from list
 			fmt.Println("Lados positivos luego seleccion aleatorio", pEdges)
+			fmt.Println("b=", b)
 		} else {
 			ccm := make([][]*Edge, 0)
 			for _, edge := range pEdges {
@@ -119,14 +135,18 @@ func getCycleGRASP(g *Graph) []*Edge {
 					i = i + 1
 				}
 			}
-			b = path[len(path)-1].end
+			if path[len(path)-1].end == path[len(path)-2].end {
+				b = path[len(path)-1].start
+			} else {
+				b = path[len(path)-1].end
+			}
 			fmt.Println("Camino aleatorio seleccionado", cmib)
 			fmt.Println("Lados positivos luego seleccion aleatorio de camino", pEdges)
 		}
 	}
 	// Check if last is depot
 	if path[len(path)-1].end != 1 {
-		minPath := g.Dijkstra(1, path[len(path)-1].end, path)
+		minPath := g.Dijkstra(1, b, path)
 		path = append(path, minPath...)
 	}
 	return path

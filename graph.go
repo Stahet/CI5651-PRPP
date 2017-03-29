@@ -53,16 +53,12 @@ func (g *Graph) String() string {
 // AddEdge function to ad edges to a graph
 func (g *Graph) AddEdge(start, end, cost, benefit int) {
 
-	if _, ok := g.edges[start][end]; ok {
-		g.edges[start][end].ocurr = g.edges[start][end].ocurr + 1
-	} else {
-		g.edges[start][end] = &Edge{start, end, cost, benefit, 1}
+	if _, ok := g.edges[start][end]; !ok {
+		g.edges[start][end] = &Edge{start, end, cost, benefit, 0}
 	}
 
-	if _, ok := g.edges[end][start]; ok {
-		g.edges[end][start].ocurr = g.edges[end][start].ocurr + 1
-	} else {
-		g.edges[end][start] = &Edge{end, start, cost, benefit, 1}
+	if _, ok := g.edges[end][start]; !ok {
+		g.edges[end][start] = &Edge{end, start, cost, benefit, 0}
 	}
 
 	if benefit-cost >= 0 {
@@ -73,18 +69,10 @@ func (g *Graph) AddEdge(start, end, cost, benefit int) {
 // RemoveEdge function to remove edge from a graph
 func (g *Graph) RemoveEdge(start, end int) {
 	if _, ok := g.edges[start][end]; ok {
-		if g.edges[start][end].ocurr <= 1 {
-			delete(g.edges[start], end)
-		} else {
-			g.edges[start][end].ocurr = g.edges[start][end].ocurr - 1
-		}
+		delete(g.edges[start], end)
 	}
 	if _, ok := g.edges[end][start]; ok {
-		if g.edges[end][start].ocurr <= 1 {
-			delete(g.edges[end], start)
-		} else {
-			g.edges[end][start].ocurr = g.edges[end][start].ocurr - 1
-		}
+		delete(g.edges[end], start)
 	}
 }
 
@@ -101,6 +89,14 @@ func (g *Graph) Neighbors(node int) []int {
 func (g *Graph) AddOcurr(start, end int) {
 	g.edges[start][end].ocurr = g.edges[start][end].ocurr + 1
 	g.edges[end][start].ocurr = g.edges[end][start].ocurr + 1
+}
+
+func (g *Graph) ResetOcurr() {
+	for _, v := range g.edges {
+		for _, edge := range v {
+			edge.ocurr = 0
+		}
+	}
 }
 
 // Dijkstra algorithm
