@@ -37,6 +37,25 @@ func main() {
 	}
 
 	var path []*Edge
+	path = getCycleGRASP(g)
+	total := 0
+	for _, edge := range path {
+		if edge.ocurr <= 1 {
+			total = total + edge.benefit - edge.cost
+			fmt.Println("nuevo   ", edge, "total: ", total)
+		} else {
+			total = total - edge.cost
+			fmt.Println("repetido", edge, "total: ", total)
+		}
+		g.AddOcurr(edge.start, edge.end)
+	}
+	fmt.Println("Ciclo: ", path)
+	fmt.Println(total)
+}
+
+// Get a initial solution using GRASP based Algorithm
+func getCycleGRASP(g *Graph) []*Edge {
+	var path []*Edge
 	var initialEdge *Edge
 	fmt.Println("Imprimiendo grafo\n", g)
 	fmt.Println("Lados positivos", g.positiveEdges)
@@ -105,23 +124,12 @@ func main() {
 			fmt.Println("Lados positivos luego seleccion aleatorio de camino", pEdges)
 		}
 	}
+	// Check if last is depot
 	if path[len(path)-1].end != 1 {
 		minPath := g.Dijkstra(1, path[len(path)-1].end, path)
 		path = append(path, minPath...)
 	}
-	total := 0
-	for i := 0; i < len(path); i++ {
-		if path[i].ocurr <= 1 {
-			total = total + path[i].benefit - path[i].cost
-			fmt.Println("nuevo   ", path[i])
-		} else {
-			total = total - path[i].cost
-			fmt.Println("repetido", path[i])
-		}
-		g.AddOcurr(path[i].start, path[i].end)
-	}
-	fmt.Println("Ciclo: ", path)
-	fmt.Println(total)
+	return path
 }
 
 //Check if node is in positiveEdges set

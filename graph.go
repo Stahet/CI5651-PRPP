@@ -132,6 +132,9 @@ func (g *Graph) Dijkstra(source int, to int, path []*Edge) []*Edge {
 			}
 		}
 		seen[u] = true
+		// if u == to {
+		// 	break
+		// }
 
 		// Calculate minimum edge distance
 		for _, edge := range g.edges[u] {
