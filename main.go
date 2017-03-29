@@ -15,8 +15,10 @@ import (
 
 func main() {
 
-	file, _ := os.Open("./instanciasPRPP/CHRISTOFIDES/P01NoRPP")
-	//file, _ := os.Open("./instanciasPRPP/RANDOM/R3NoRPP")
+	file, _ := os.Open("./instanciasPRPP/CHRISTOFIDES/P02NoRPP")
+	//file, _ := os.Open("./instanciasPRPP/RANDOM/R9NoRPP")
+	//file, _ := os.Open("./instanciasPRPP/DEGREE/D2NoRPP")
+	//file, _ := os.Open("./instanciasPRPP/GRID/G16NoRPP")
 	lineScanner := bufio.NewScanner(file)
 	line := 0
 	g := NewGraph(1)
@@ -44,10 +46,14 @@ func main() {
 
 	fmt.Println("Ciclo Greedy: ", path)
 	fmt.Println("Total: ", getCycleCost(g, path))
-	var branchSol []*Edge
-	branchSol = g.branchAndBound(path[0], path)
-	fmt.Println("Ciclo Branch and bound: ", branchSol)
-	fmt.Println("Total: ", getCycleCost(g, branchSol))
+
+	path = removeNegativeCycle(g, path)
+	fmt.Println("Nuevo ciclo sin negativo: ", path)
+	fmt.Println("Total: ", getCycleCost(g, path))
+	// var branchSol []*Edge
+	// branchSol = g.branchAndBound(path[0], path)
+	// fmt.Println("Ciclo Branch and bound: ", branchSol)
+	// fmt.Println("Total: ", getCycleCost(g, branchSol))
 }
 
 func getCycleCost(g *Graph, cycle []*Edge) int {
@@ -56,10 +62,10 @@ func getCycleCost(g *Graph, cycle []*Edge) int {
 	for _, edge := range cycle {
 		if edge.ocurr <= 0 {
 			total = total + edge.benefit - edge.cost
-			fmt.Println("nuevo   ", edge, "total: ", total)
+			//fmt.Println("nuevo   ", edge, "total: ", total)
 		} else {
 			total = total - edge.cost
-			fmt.Println("repetido", edge, "total: ", total)
+			//fmt.Println("repetido", edge, "total: ", total)
 		}
 		g.AddOcurr(edge.start, edge.end)
 	}
@@ -67,18 +73,27 @@ func getCycleCost(g *Graph, cycle []*Edge) int {
 }
 
 // Remove negative cycle from a solution
-// func removeNegativeCycle(cycle []*Edge) {
-// 	i, j := 0, 0
-// 	var e1 *Edge
-// 	var e2 *Edge
-// 	for i := 0; i < len(cycle); i++ {
-// 		e1 = cycle[i+1]
-// 		for j := i + 1; j < len(cycle); j++ {
-// 			e2 = cycle[j]
-// 			if (e1.start == e2.end)
-// 		}
-// 	}
-// }
+func removeNegativeCycle(g *Graph, path []*Edge) []*Edge {
+	start, end := 0, 0
+	for i := 0; i < len(path); i++ {
+		//fmt.Println("i=", i, "edge: ", path[i])
+		start = path[i].start
+		for j := i + 1; j < len(path); j++ {
+			end = path[j].end
+			if start == end {
+				//fmt.Println("i,j=", i, j)
+				if getCycleCost(g, path[i:j]) <= 0 {
+					fmt.Println("Removiendo ciclo negativo", path[i:j+1], "total: ", getCycleCost(g, path[i:j+1]))
+					path = append(path[:i], path[j+1:]...)
+					//fmt.Println("New Path", path, "total: ", getCycleCost(g, path))
+					i = i - 1
+					break
+				}
+			}
+		}
+	}
+	return path
+}
 
 // Get a initial solution using GRASP based Algorithm
 func getCycleGRASP(g *Graph) []*Edge {
@@ -98,7 +113,7 @@ func getCycleGRASP(g *Graph) []*Edge {
 				initialEdge = g.edges[1][node]
 			}
 		}
-		fmt.Println("No hay lado positivo adyacente, seleccionando de E: ", initialEdge)
+		//fmt.Println("No hay lado positivo adyacente, seleccionando de E: ", initialEdge)
 	} else {
 		// Select first positive edge from depot
 		for index, edge := range pEdges {
@@ -108,7 +123,7 @@ func getCycleGRASP(g *Graph) []*Edge {
 				break
 			}
 		}
-		fmt.Println("Existe un lado positivo adyacente, seleccionando: ", initialEdge)
+		//fmt.Println("Existe un lado positivo adyacente, seleccionando: ", initialEdge)
 	}
 
 	// Set depot initial edge
@@ -125,10 +140,10 @@ func getCycleGRASP(g *Graph) []*Edge {
 				b = pEdges[adjEdge].start
 				path = append(path, g.edges[pEdges[adjEdge].end][b])
 			}
-			fmt.Println("Lado positivo aleatorio seleccionado", pEdges[adjEdge])
+			//fmt.Println("Lado positivo aleatorio seleccionado", pEdges[adjEdge])
 			pEdges = append(pEdges[:adjEdge], pEdges[adjEdge+1:]...) // Delete Edge from list
-			fmt.Println("Lados positivos luego seleccion aleatorio", pEdges)
-			fmt.Println("b=", b)
+			//fmt.Println("Lados positivos luego seleccion aleatorio", pEdges)
+			//fmt.Println("b=", b)
 		} else {
 			ccm := make([][]*Edge, 0)
 			for _, edge := range pEdges {
@@ -153,8 +168,8 @@ func getCycleGRASP(g *Graph) []*Edge {
 			} else {
 				b = path[len(path)-1].end
 			}
-			fmt.Println("Camino aleatorio seleccionado", cmib)
-			fmt.Println("Lados positivos luego seleccion aleatorio de camino", pEdges)
+			//fmt.Println("Camino aleatorio seleccionado", cmib)
+			//fmt.Println("Lados positivos luego seleccion aleatorio de camino", pEdges)
 		}
 	}
 	// Check if last is depot
@@ -184,8 +199,8 @@ func getEdge(positiveEdges []*Edge, b int) int {
 	for index, elem := range positiveEdges {
 		weights[index] = elem.benefit - elem.cost + 1
 	}
-	fmt.Println("Lados probables a seleccionar getEdge", positiveEdges)
-	fmt.Println("Pesos getEdge:", weights)
+	//fmt.Println("Lados probables a seleccionar getEdge", positiveEdges)
+	//fmt.Println("Pesos getEdge:", weights)
 	wc.Weights = weights
 	random := wc.BinarySearch().(int) // Binary search random number with weight
 	edge := positiveEdges[random]
@@ -201,14 +216,14 @@ func getEdge(positiveEdges []*Edge, b int) int {
 func getPath(ccm [][]*Edge) []*Edge {
 	var total int
 	pathCost := make([]int, len(ccm)) // Create array of path cost
-	fmt.Println("caminos")
+	//fmt.Println("caminos")
 	for index, path := range ccm {
 		total = 0
 		for _, edge := range path {
 			total = total + edge.benefit - edge.cost
 		}
 		pathCost[index] = total
-		fmt.Println(path, "Cost: ", total)
+		//fmt.Println(path, "Cost: ", total)
 	}
 
 	// Because there is a possibility to get a negative total cost
@@ -232,7 +247,7 @@ func getPath(ccm [][]*Edge) []*Edge {
 		}
 
 	}
-	fmt.Println("pathCost", pathCost)
+	//fmt.Println("pathCost", pathCost)
 	rand.Seed(time.Now().UTC().UnixNano())
 	wc := new(wc.WeightedChoice)
 	wc.Weights = pathCost             // Assign an array position a weight according to cost
