@@ -58,6 +58,7 @@ func main() {
 	//branchSol = g.branchAndBound(1, branchSol, path, beneficio)
 	fmt.Println("Ciclo Branch and bound: ", branchSol)
 	fmt.Println("Total: ", g.getPathBenefit(branchSol))
+	fmt.Println(g.obtenerListaSucesores(1))
 }
 
 // Remove negative cycle from a solution

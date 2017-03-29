@@ -189,30 +189,30 @@ func (g *Graph) Benefit(start, end int) int {
 }
 
 func (g *Graph) estaEnSolucionParcial(e *Edge, solParcial []*Edge) bool {
-	esta := false
-	for edge := range solParcial {
-		if !(solParcial[edge] == e) {
-			esta = false
-		} else if solParcial[edge] == e {
-			if solParcial[edge].ocurr == 1 {
-				esta = false
-			} else {
-				esta = true
-			}
-		} else {
-			esta = true
+	ocurr := 0
+	for _, edge := range solParcial {
+		if edge.equals(e) {
+			ocurr = ocurr + 1
 		}
-		// if !(g.edges[e.start][e.end] == nil) {
-		// 	return false
-		// } else if g.edges[e.start][e.end].ocurr == 1 {
-		// 	if g.edges[e.start][e.end].benefit == 0 {
-		// 		return false
-		// 	}
-		// 	return true
-		// } else {
-		// 	return true
+		if ocurr >= 2 {
+			return true
+		}
 	}
-	return esta
+	return false
+}
+
+func (g *Graph) obtenerListaSucesores(v int) []*Edge {
+	var lista Edges
+	newlist := make([]*Edge, 0, len(g.edges[v])*2)
+	for _, edge := range g.edges[v] {
+		lista = append(lista, Edge{edge.start, edge.end, edge.cost, edge.benefit, 0})
+		lista = append(lista, Edge{edge.start, edge.end, edge.cost, 0, 0})
+	}
+	sort.Sort(sort.Reverse(lista))
+	for _, edge := range lista {
+		newlist = append(newlist, g.edges[edge.start][edge.end])
+	}
+	return newlist
 }
 
 func (g *Graph) cumpleAcotamiento(e *Edge, solParcial []*Edge, mejorSol []*Edge, beneficioDisponible int) bool {
@@ -251,18 +251,14 @@ func (g *Graph) branchAndBound(e int, solParcial []*Edge, mejorSol []*Edge, bene
 }
 
 func (g *Graph) checkNegativeCycle(e *Edge, solParcial []*Edge) bool {
-	if g.edges[e.end] == nil {
-		totalBenefit = e.benefit - e.cost
-		for i := len(g.edges); i > 0; i-- {
-			if solParcial[i].start == e.end {
-				break
-			} else {
-				totalBenefit = totalBenefit + solParcial[i].benefit - solParcial[i].cost
+	path := append(solParcial, e)
+	for index, edge := range solParcial {
+		if edge.start == e.end {
+			totalBenefit = g.getPathBenefit(path[index:])
+			if totalBenefit < 0 {
+				return true
 			}
 		}
-	}
-	if totalBenefit < 0 {
-		return true
 	}
 	return false
 }
@@ -295,4 +291,18 @@ func NewGraph(nodes int) *Graph {
 		g.edges[i] = tmap
 	}
 	return g
+}
+
+type Edges []Edge
+
+func (slice Edges) Len() int {
+	return len(slice)
+}
+
+func (slice Edges) Less(i, j int) bool {
+	return slice[i].benefit-slice[i].cost < slice[j].benefit-slice[j].cost
+}
+
+func (slice Edges) Swap(i, j int) {
+	slice[i], slice[j] = slice[j], slice[i]
 }
