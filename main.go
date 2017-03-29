@@ -15,7 +15,7 @@ import (
 
 func main() {
 
-	file, _ := os.Open("./instanciasPRPP/CHRISTOFIDES/P15NoRPP")
+	file, _ := os.Open("./instanciasPRPP/CHRISTOFIDES/P01NoRPP")
 	//file, _ := os.Open("./instanciasPRPP/RANDOM/R0NoRPP")
 	lineScanner := bufio.NewScanner(file)
 	line := 0
@@ -38,8 +38,8 @@ func main() {
 
 	var path []*Edge
 	var initialEdge *Edge
-	fmt.Println(g)
-	fmt.Println("positivos", g.positiveEdges)
+	fmt.Println("Imprimiendo grafo\n", g)
+	fmt.Println("Lados positivos", g.positiveEdges)
 
 	pEdges := g.positiveEdges
 	// Check if deposit (1) in T
@@ -52,6 +52,7 @@ func main() {
 				initialEdge = g.edges[1][node]
 			}
 		}
+		fmt.Println("No hay lado positivo adyacente, seleccionando de E: ", initialEdge)
 	} else {
 		// Select first positive edge from depot
 		for index, edge := range pEdges {
@@ -61,6 +62,7 @@ func main() {
 				break
 			}
 		}
+		fmt.Println("Existe un lado positivo adyacente, seleccionando: ", initialEdge)
 	}
 
 	// Set depot initial edge
@@ -75,8 +77,10 @@ func main() {
 			} else if pEdges[adjEdge].end == b {
 				b = pEdges[adjEdge].start
 			}
+			fmt.Println("Lado positivo aleatorio seleccionado", pEdges[adjEdge])
 			path = append(path, pEdges[adjEdge])
 			pEdges = append(pEdges[:adjEdge], pEdges[adjEdge+1:]...) // Delete Edge from list
+			fmt.Println("Lados positivos luego seleccion aleatorio", pEdges)
 		} else {
 			ccm := make([][]*Edge, 0)
 			for _, edge := range pEdges {
@@ -89,8 +93,7 @@ func main() {
 			for _, elem := range path {
 				i := 0
 				for i < len(pEdges) {
-					if (elem.start == pEdges[i].start && elem.end == pEdges[i].end) ||
-						(elem.end == pEdges[i].start && elem.start == pEdges[i].end) {
+					if elem.equals(pEdges[i]) {
 						pEdges = append(pEdges[:i], pEdges[i+1:]...) // Delete Edge from list
 						break
 					}
@@ -98,6 +101,8 @@ func main() {
 				}
 			}
 			b = path[len(path)-1].end
+			fmt.Println("Camino aleatorio seleccionado", cmib)
+			fmt.Println("Lados positivos luego seleccion aleatorio de camino", pEdges)
 		}
 	}
 	if path[len(path)-1].end != 1 {
@@ -119,6 +124,7 @@ func main() {
 	fmt.Println(total)
 }
 
+//Check if node is in positiveEdges set
 func inPositiveEdges(positiveEdges []*Edge, node int) bool {
 	for _, edge := range positiveEdges {
 		if edge.start == node || edge.end == node {
@@ -135,16 +141,15 @@ func getEdge(positiveEdges []*Edge, b int) int {
 	weights := make([]int, len(positiveEdges))
 	// Construct weight array
 	for index, elem := range positiveEdges {
-		weights[index] = elem.benefit - elem.cost
-		if weights[index] == 0 {
-			weights[index] = 1
-		}
+		weights[index] = elem.benefit - elem.cost + 1
 	}
+	fmt.Println("Lados probables a seleccionar getEdge", positiveEdges)
+	fmt.Println("Pesos getEdge:", weights)
 	wc.Weights = weights
-	random := wc.BinarySearch().(int)
+	random := wc.BinarySearch().(int) // Binary search random number with weight
 	edge := positiveEdges[random]
+	// Random until start or end == b
 	for edge.start != b && edge.end != b {
-		rand.Seed(time.Now().UTC().UnixNano())
 		random = wc.BinarySearch().(int)
 		edge = positiveEdges[random]
 	}
@@ -155,12 +160,14 @@ func getEdge(positiveEdges []*Edge, b int) int {
 func getPath(ccm [][]*Edge) []*Edge {
 	var total int
 	pathCost := make([]int, len(ccm)) // Create array of path cost
+	fmt.Println("caminos")
 	for index, path := range ccm {
 		total = 0
 		for _, edge := range path {
 			total = total + edge.benefit - edge.cost
 		}
 		pathCost[index] = total
+		fmt.Println(path, "Cost: ", total)
 	}
 
 	// Because there is a possibility to get a negative total cost
@@ -173,17 +180,18 @@ func getPath(ccm [][]*Edge) []*Edge {
 			min = elem
 		}
 	}
+	if min == 0 {
+		min = 1
+	}
 	for i := 0; i < len(pathCost); i++ {
 		if pathCost[i] > 0 {
-			pathCost[i] = pathCost[i] * int(math.Abs(float64(min)))
+			pathCost[i] = pathCost[i]*int(math.Abs(float64(min))) + 1
 		} else {
-			pathCost[i] = pathCost[i] + int(math.Abs(float64(min)))
+			pathCost[i] = pathCost[i] + int(math.Abs(float64(min))) + 1
 		}
-		if pathCost[i] == 0 {
-			pathCost[i] = 1
-		}
-	}
 
+	}
+	fmt.Println("pathCost", pathCost)
 	rand.Seed(time.Now().UTC().UnixNano())
 	wc := new(wc.WeightedChoice)
 	wc.Weights = pathCost             // Assign an array position a weight according to cost

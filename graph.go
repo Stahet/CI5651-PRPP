@@ -154,7 +154,7 @@ func (g *Graph) reconstructPath(from int, to int, prev []int) []*Edge {
 
 func costMinimumPath(edge *Edge, path []*Edge) int {
 	for _, elem := range path {
-		if edge == elem {
+		if edge.equals(elem) {
 			return edge.cost
 		}
 	}
@@ -162,6 +162,11 @@ func costMinimumPath(edge *Edge, path []*Edge) int {
 		return (edge.benefit - edge.cost) * (-1)
 	}
 	return 0
+}
+
+// Check if 2 edges are equals
+func (e1 *Edge) equals(e2 *Edge) bool {
+	return (e1.start == e2.start && e1.end == e2.end) || (e1.start == e2.end && e1.end == e2.start)
 }
 
 // Degree function to return the incidence degree of a node
@@ -192,16 +197,16 @@ func (g *Graph) estaEnSolucionParcial(e *Edge) bool {
 	}
 }
 
-// func (g *Graph) cumpleAcotamiento(e Edge, mejorSol *Graph) bool {
-// 	beneficioE := e.benefit - e.cost
-// 	beneficioSolParcial := beneficio(g) + beneficioE
-// 	maxBeneficio := beneficioDisponible - max(0, beneficioE) + beneficioSolParcial
-// 	if maxBeneficio <= beneficio(mejorSol) {
-// 		return false
-// 	} else {
-// 		return true
-// 	}
-// }
+func (g *Graph) cumpleAcotamiento(e Edge, mejorSol *Graph) bool {
+	beneficioE := e.benefit - e.cost
+	beneficioSolParcial := beneficio(g) + beneficioE
+	maxBeneficio := beneficioDisponible - max(0, beneficioE) + beneficioSolParcial
+	if maxBeneficio <= beneficio(mejorSol) {
+		return false
+	} else {
+		return true
+	}
+}
 
 func (g *Graph) branchAndBound(e *Edge, path []*Edge) {
 	if e.end == 1 {
