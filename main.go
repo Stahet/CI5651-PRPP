@@ -22,6 +22,7 @@ func main() {
 	lineScanner := bufio.NewScanner(file)
 	line := 0
 	g := NewGraph(1)
+	beneficio := 0
 	// branchG := NewGraph(1)
 	for lineScanner.Scan() {
 		contents := strings.Fields(lineScanner.Text())
@@ -36,6 +37,7 @@ func main() {
 			cost, _ := strconv.ParseInt(contents[2], 0, 0)
 			benefit, _ := strconv.ParseInt(contents[3], 0, 0)
 			g.AddEdge(int(startNode), int(endNode), int(cost), int(benefit))
+			beneficio = beneficio + g.Benefit(int(startNode), int(endNode))
 			// branchG.AddEdge(int(startNode), int(endNode), int(cost), int(benefit))
 		}
 		line++
@@ -50,10 +52,12 @@ func main() {
 	path = removeNegativeCycle(g, path)
 	fmt.Println("Nuevo ciclo sin negativo: ", path)
 	fmt.Println("Total: ", getCycleCost(g, path))
-	// var branchSol []*Edge
-	// branchSol = g.branchAndBound(path[0], path)
-	// fmt.Println("Ciclo Branch and bound: ", branchSol)
-	// fmt.Println("Total: ", getCycleCost(g, branchSol))
+
+	var branchSol []*Edge
+	branchSol = make([]*Edge, 0, 0)
+	branchSol = g.branchAndBound(1, branchSol, path, beneficio)
+	fmt.Println("Ciclo Branch and bound: ", branchSol)
+	fmt.Println("Total: ", getCycleCost(g, branchSol))
 }
 
 func getCycleCost(g *Graph, cycle []*Edge) int {
