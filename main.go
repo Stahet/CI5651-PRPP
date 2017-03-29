@@ -20,11 +20,13 @@ func main() {
 	lineScanner := bufio.NewScanner(file)
 	line := 0
 	g := NewGraph(1)
+	// branchG := NewGraph(1)
 	for lineScanner.Scan() {
 		contents := strings.Fields(lineScanner.Text())
 		if line == 0 {
 			number, _ := strconv.ParseInt(contents[len(contents)-1], 0, 0)
 			g = NewGraph(int(number))
+			// branchG = NewGraph(int(number))
 		}
 		if _, err := strconv.Atoi(contents[0]); err == nil {
 			startNode, _ := strconv.ParseInt(contents[0], 0, 0)
@@ -32,6 +34,7 @@ func main() {
 			cost, _ := strconv.ParseInt(contents[2], 0, 0)
 			benefit, _ := strconv.ParseInt(contents[3], 0, 0)
 			g.AddEdge(int(startNode), int(endNode), int(cost), int(benefit))
+			// branchG.AddEdge(int(startNode), int(endNode), int(cost), int(benefit))
 		}
 		line++
 	}
@@ -50,6 +53,20 @@ func main() {
 		g.AddOcurr(edge.start, edge.end)
 	}
 	fmt.Println("Ciclo: ", path)
+	fmt.Println(total)
+	var branchSol []*Edge
+	branchSol = g.branchAndBound(path[0], path)
+	for _, edge := range branchSol {
+		if edge.ocurr <= 1 {
+			total = total + edge.benefit - edge.cost
+			fmt.Println("nuevo   ", edge, "total: ", total)
+		} else {
+			total = total - edge.cost
+			fmt.Println("repetido", edge, "total: ", total)
+		}
+		g.AddOcurr(edge.start, edge.end)
+	}
+	fmt.Println("Ciclo: ", branchSol)
 	fmt.Println(total)
 }
 

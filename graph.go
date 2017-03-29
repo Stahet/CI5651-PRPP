@@ -216,25 +216,31 @@ func (g *Graph) cumpleAcotamiento(e *Edge, mejorSol []*Edge) bool {
 	return true
 }
 
-func (g *Graph) branchAndBound(e *Edge, path []*Edge) {
+func (g *Graph) branchAndBound(e *Edge, path []*Edge) []*Edge {
 	if e.end == 1 {
 		if beneficio(path) > beneficio(mejorSol) {
 			mejorSol = path
 		}
 	}
-	sucesores := g.Neighbors(e.end)
+	sucesores := g.Neighbors(e.start)
+	fmt.Println(sucesores)
 	for _, edge := range sucesores {
-		if g.verifyConditions(g.edges[e.end][edge], path) {
+		fmt.Println(g.edges[e.start][edge])
+		if g.verifyConditions(g.edges[e.start][edge], path) {
+			path = append(path, g.edges[e.start][edge])
 			// g.AddEdge(g.edges[e.end][edge], solParcial)
-			beneficioDisponible = beneficioDisponible - int(math.Max(0, float64(g.edges[e.end][edge].benefit-g.edges[e.end][edge].cost)))
+			beneficioDisponible = beneficioDisponible - int(math.Max(0, float64(g.edges[e.start][edge].benefit-g.edges[e.start][edge].cost)))
 			g.branchAndBound(g.edges[e.end][edge], solParcial)
 		}
-		// edge = eliminarUltimoLado(solParcial)
-		beneficioDisponible = beneficioDisponible - int(math.Max(0, float64(g.edges[e.end][edge].benefit-g.edges[e.end][edge].cost)))
+		path = path[:len(path)-1] // edge = eliminarUltimoLado(solParcial)
+		beneficioDisponible = beneficioDisponible - int(math.Max(0, float64(g.edges[e.start][edge].benefit-g.edges[e.start][edge].cost)))
 	}
+	return path
 }
 
 func (g *Graph) checkNegativeCycle(e *Edge, solParcial []*Edge) bool {
+	fmt.Println(g.edges[e.end])
+	fmt.Println(g.edges[e.end])
 	if g.edges[e.end] == nil {
 		totalBenefit = e.benefit - e.cost
 		for i := len(g.edges); i > 0; i-- {
