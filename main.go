@@ -15,7 +15,7 @@ import (
 
 func main() {
 
-	file, _ := os.Open("./instanciasPRPP/CHRISTOFIDES/P02NoRPP")
+	file, _ := os.Open("./instanciasPRPP/CHRISTOFIDES/P01NoRPP")
 	//file, _ := os.Open("./instanciasPRPP/RANDOM/R3NoRPP")
 	lineScanner := bufio.NewScanner(file)
 	line := 0
@@ -41,8 +41,19 @@ func main() {
 
 	var path []*Edge
 	path = getCycleGRASP(g)
+
+	fmt.Println("Ciclo Greedy: ", path)
+	fmt.Println("Total: ", getCycleCost(g, path))
+	var branchSol []*Edge
+	branchSol = g.branchAndBound(path[0], path)
+	fmt.Println("Ciclo Branch and bound: ", branchSol)
+	fmt.Println("Total: ", getCycleCost(g, branchSol))
+}
+
+func getCycleCost(g *Graph, cycle []*Edge) int {
+	g.ResetOcurr()
 	total := 0
-	for _, edge := range path {
+	for _, edge := range cycle {
 		if edge.ocurr <= 0 {
 			total = total + edge.benefit - edge.cost
 			fmt.Println("nuevo   ", edge, "total: ", total)
@@ -52,22 +63,7 @@ func main() {
 		}
 		g.AddOcurr(edge.start, edge.end)
 	}
-	fmt.Println("Ciclo: ", path)
-	fmt.Println(total)
-	var branchSol []*Edge
-	branchSol = g.branchAndBound(path[0], path)
-	for _, edge := range branchSol {
-		if edge.ocurr <= 1 {
-			total = total + edge.benefit - edge.cost
-			fmt.Println("nuevo   ", edge, "total: ", total)
-		} else {
-			total = total - edge.cost
-			fmt.Println("repetido", edge, "total: ", total)
-		}
-		g.AddOcurr(edge.start, edge.end)
-	}
-	fmt.Println("Ciclo: ", branchSol)
-	fmt.Println(total)
+	return total
 }
 
 // Remove negative cycle from a solution
