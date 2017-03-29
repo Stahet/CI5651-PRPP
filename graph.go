@@ -24,7 +24,6 @@ type Graph struct {
 var mejorSol []*Edge
 var beneficioDisponible int
 var solParcial []*Edge
-
 var totalBenefit int
 
 func (e *Edge) String() string {
@@ -189,22 +188,36 @@ func (g *Graph) Benefit(start, end int) int {
 	return g.edges[start][end].benefit
 }
 
-func (g *Graph) estaEnSolucionParcial(e *Edge) bool {
-	if !(g.edges[e.start][e.end] == nil) {
-		return false
-	} else if g.edges[e.start][e.end].ocurr == 1 {
-		if g.edges[e.start][e.end].benefit == 0 {
-			return false
+func (g *Graph) estaEnSolucionParcial(e *Edge, solParcial []*Edge) bool {
+	esta := false
+	for edge := range solParcial {
+		if !(solParcial[edge] == e) {
+			esta = false
+		} else if solParcial[edge] == e {
+			if solParcial[edge].ocurr == 1 {
+				esta = false
+			} else {
+				esta = true
+			}
+		} else {
+			esta = true
 		}
-		return true
-	} else {
-		return true
+		// if !(g.edges[e.start][e.end] == nil) {
+		// 	return false
+		// } else if g.edges[e.start][e.end].ocurr == 1 {
+		// 	if g.edges[e.start][e.end].benefit == 0 {
+		// 		return false
+		// 	}
+		// 	return true
+		// } else {
+		// 	return true
 	}
+	return esta
 }
 
-func (g *Graph) cumpleAcotamiento(e *Edge, mejorSol []*Edge) bool {
+func (g *Graph) cumpleAcotamiento(e *Edge, solParcial []*Edge, mejorSol []*Edge, beneficioDisponible int) bool {
 	beneficioE := e.benefit - e.cost
-	beneficioSolParcial := beneficio(mejorSol) + beneficioE
+	beneficioSolParcial := beneficio(solParcial) + beneficioE
 	maxBeneficio := beneficioDisponible - int(math.Max(0, float64(beneficioE))) + beneficioSolParcial
 	if maxBeneficio <= beneficio(mejorSol) {
 		return false
@@ -212,31 +225,32 @@ func (g *Graph) cumpleAcotamiento(e *Edge, mejorSol []*Edge) bool {
 	return true
 }
 
-func (g *Graph) branchAndBound(e *Edge, path []*Edge) []*Edge {
-	if e.end == 1 {
-		if beneficio(path) > beneficio(mejorSol) {
-			mejorSol = path
+func (g *Graph) branchAndBound(e int, solParcial []*Edge, mejorSol []*Edge, beneficioDisponible int) []*Edge {
+	if e == 1 {
+		if beneficio(solParcial) > beneficio(mejorSol) {
+			mejorSol = solParcial
 		}
 	}
-	sucesores := g.Neighbors(e.start)
-	fmt.Println(sucesores)
+	sucesores := g.Neighbors(e)
 	for _, edge := range sucesores {
-		fmt.Println(g.edges[e.start][edge])
-		if g.verifyConditions(g.edges[e.start][edge], path) {
-			path = append(path, g.edges[e.start][edge])
+		// fmt.Println(g.verifyConditions(g.edges[e][edge], solParcial, mejorSol))
+		// if g.verifyConditions(g.edges[e][edge], solParcial, mejorSol) {
+		if !(g.estaEnSolucionParcial(g.edges[e][edge], solParcial)) && g.cumpleAcotamiento(g.edges[e][edge], solParcial, mejorSol, beneficioDisponible) {
+			solParcial = append(solParcial, g.edges[e][edge])
+			// fmt.Println(beneficioDisponible)
 			// g.AddEdge(g.edges[e.end][edge], solParcial)
-			beneficioDisponible = beneficioDisponible - int(math.Max(0, float64(g.edges[e.start][edge].benefit-g.edges[e.start][edge].cost)))
-			g.branchAndBound(g.edges[e.end][edge], solParcial)
+			beneficioDisponible = beneficioDisponible - int(math.Max(0, float64(g.edges[e][edge].benefit-g.edges[e][edge].cost)))
+			g.branchAndBound(edge, solParcial, mejorSol, beneficioDisponible)
 		}
-		path = path[:len(path)-1] // edge = eliminarUltimoLado(solParcial)
-		beneficioDisponible = beneficioDisponible - int(math.Max(0, float64(g.edges[e.start][edge].benefit-g.edges[e.start][edge].cost)))
+		fmt.Println(solParcial)
+		solParcial = solParcial[:len(solParcial)-1] // edge = eliminarUltimoLado(solParcial)
+		beneficioDisponible = beneficioDisponible + int(math.Max(0, float64(g.edges[e][edge].benefit-g.edges[e][edge].cost)))
 	}
-	return path
+	fmt.Println("Sali Mas")
+	return solParcial
 }
 
 func (g *Graph) checkNegativeCycle(e *Edge, solParcial []*Edge) bool {
-	fmt.Println(g.edges[e.end])
-	fmt.Println(g.edges[e.end])
 	if g.edges[e.end] == nil {
 		totalBenefit = e.benefit - e.cost
 		for i := len(g.edges); i > 0; i-- {
@@ -253,9 +267,9 @@ func (g *Graph) checkNegativeCycle(e *Edge, solParcial []*Edge) bool {
 	return false
 }
 
-func (g *Graph) verifyConditions(e *Edge, solParcial []*Edge) bool {
-	return g.checkNegativeCycle(e, solParcial) && g.estaEnSolucionParcial(e) && g.cumpleAcotamiento(e, mejorSol)
-}
+// func (g *Graph) verifyConditions(e *Edge, solParcial []*Edge, mejorSol []*Edge) bool {
+// return g.checkNegativeCycle(e, solParcial) && g.estaEnSolucionParcial(e, solParcial) && g.cumpleAcotamiento(e, mejorSol,)
+// }
 
 // NewGraph function to create a new graph
 func NewGraph(nodes int) *Graph {

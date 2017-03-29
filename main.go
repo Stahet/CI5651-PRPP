@@ -15,11 +15,12 @@ import (
 
 func main() {
 
-	file, _ := os.Open("./instanciasPRPP/CHRISTOFIDES/P01NoRPP")
+	file, _ := os.Open("./instanciasPRPP/CHRISTOFIDES/P02NoRPP")
 	//file, _ := os.Open("./instanciasPRPP/RANDOM/R3NoRPP")
 	lineScanner := bufio.NewScanner(file)
 	line := 0
 	g := NewGraph(1)
+	beneficio := 0
 	// branchG := NewGraph(1)
 	for lineScanner.Scan() {
 		contents := strings.Fields(lineScanner.Text())
@@ -34,6 +35,7 @@ func main() {
 			cost, _ := strconv.ParseInt(contents[2], 0, 0)
 			benefit, _ := strconv.ParseInt(contents[3], 0, 0)
 			g.AddEdge(int(startNode), int(endNode), int(cost), int(benefit))
+			beneficio = beneficio + g.Benefit(int(startNode), int(endNode))
 			// branchG.AddEdge(int(startNode), int(endNode), int(cost), int(benefit))
 		}
 		line++
@@ -45,7 +47,8 @@ func main() {
 	fmt.Println("Ciclo Greedy: ", path)
 	fmt.Println("Total: ", getCycleCost(g, path))
 	var branchSol []*Edge
-	branchSol = g.branchAndBound(path[0], path)
+	branchSol = make([]*Edge, 0, 0)
+	branchSol = g.branchAndBound(1, branchSol, path, beneficio)
 	fmt.Println("Ciclo Branch and bound: ", branchSol)
 	fmt.Println("Total: ", getCycleCost(g, branchSol))
 }
