@@ -217,9 +217,9 @@ func (g *Graph) obtenerListaSucesores(v int) []*Edge {
 
 func (g *Graph) cumpleAcotamiento(e *Edge, solParcial []*Edge, mejorSol []*Edge, beneficioDisponible int) bool {
 	beneficioE := e.benefit - e.cost
-	beneficioSolParcial := beneficio(solParcial) + beneficioE
+	beneficioSolParcial := g.getPathBenefit(solParcial) + beneficioE
 	maxBeneficio := beneficioDisponible - int(math.Max(0, float64(beneficioE))) + beneficioSolParcial
-	if maxBeneficio <= beneficio(mejorSol) {
+	if maxBeneficio <= g.getPathBenefit(mejorSol) {
 		return false
 	}
 	return true
@@ -227,25 +227,26 @@ func (g *Graph) cumpleAcotamiento(e *Edge, solParcial []*Edge, mejorSol []*Edge,
 
 func (g *Graph) branchAndBound(e int, solParcial []*Edge, mejorSol []*Edge, beneficioDisponible int) []*Edge {
 	if e == 1 {
-		if beneficio(solParcial) > beneficio(mejorSol) {
+		if g.getPathBenefit(solParcial) > g.getPathBenefit(mejorSol) {
 			mejorSol = solParcial
 		}
 	}
-	sucesores := g.Neighbors(e)
+	sucesores := g.obtenerListaSucesores(e)
 	for _, edge := range sucesores {
 		// fmt.Println(g.verifyConditions(g.edges[e][edge], solParcial, mejorSol))
 		// if g.verifyConditions(g.edges[e][edge], solParcial, mejorSol) {
-		if !(g.estaEnSolucionParcial(g.edges[e][edge], solParcial)) && g.cumpleAcotamiento(g.edges[e][edge], solParcial, mejorSol, beneficioDisponible) {
-			solParcial = append(solParcial, g.edges[e][edge])
+		if !(g.estaEnSolucionParcial(edge, solParcial)) && g.cumpleAcotamiento(edge, solParcial, mejorSol, beneficioDisponible) && g.checkNegativeCycle(edge, solParcial) {
+			solParcial = append(solParcial, edge)
 			// fmt.Println(beneficioDisponible)
 			// g.AddEdge(g.edges[e.end][edge], solParcial)
-			beneficioDisponible = beneficioDisponible - int(math.Max(0, float64(g.edges[e][edge].benefit-g.edges[e][edge].cost)))
-			g.branchAndBound(edge, solParcial, mejorSol, beneficioDisponible)
+			beneficioDisponible = beneficioDisponible - int(math.Max(0, float64(edge.benefit-edge.cost)))
+			g.branchAndBound(edge.end, solParcial, mejorSol, beneficioDisponible)
 		}
 		fmt.Println(solParcial)
-		solParcial = solParcial[:len(solParcial)-1] // edge = eliminarUltimoLado(solParcial)
-		beneficioDisponible = beneficioDisponible + int(math.Max(0, float64(g.edges[e][edge].benefit-g.edges[e][edge].cost)))
 	}
+	solParcial = solParcial[:len(solParcial)-1] // edge = eliminarUltimoLado(solParcial)
+	ultimo := solParcial[len(solParcial)-1]
+	beneficioDisponible = beneficioDisponible + int(math.Max(0, float64(ultimo.benefit-ultimo.cost)))
 	fmt.Println("Sali Mas")
 	return solParcial
 }
