@@ -267,6 +267,22 @@ func (g *Graph) checkNegativeCycle(e *Edge, solParcial []*Edge) bool {
 	return false
 }
 
+func (g *Graph) getPathBenefit(path []*Edge) int {
+	g.ResetOcurr()
+	total := 0
+	for _, edge := range path {
+		if edge.ocurr <= 0 {
+			total = total + edge.benefit - edge.cost
+			//fmt.Println("nuevo   ", edge, "total: ", total)
+		} else {
+			total = total - edge.cost
+			//fmt.Println("repetido", edge, "total: ", total)
+		}
+		g.AddOcurr(edge.start, edge.end)
+	}
+	return total
+}
+
 // func (g *Graph) verifyConditions(e *Edge, solParcial []*Edge, mejorSol []*Edge) bool {
 // return g.checkNegativeCycle(e, solParcial) && g.estaEnSolucionParcial(e, solParcial) && g.cumpleAcotamiento(e, mejorSol,)
 // }

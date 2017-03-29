@@ -47,33 +47,17 @@ func main() {
 	path = getCycleGRASP(g)
 
 	fmt.Println("Ciclo Greedy: ", path)
-	fmt.Println("Total: ", getCycleCost(g, path))
+	fmt.Println("Total: ", g.getPathBenefit(path))
 
 	path = removeNegativeCycle(g, path)
 	fmt.Println("Nuevo ciclo sin negativo: ", path)
-	fmt.Println("Total: ", getCycleCost(g, path))
+	fmt.Println("Total: ", g.getPathBenefit(path))
 
 	var branchSol []*Edge
 	branchSol = make([]*Edge, 0, 0)
-	branchSol = g.branchAndBound(1, branchSol, path, beneficio)
+	//branchSol = g.branchAndBound(1, branchSol, path, beneficio)
 	fmt.Println("Ciclo Branch and bound: ", branchSol)
-	fmt.Println("Total: ", getCycleCost(g, branchSol))
-}
-
-func getCycleCost(g *Graph, cycle []*Edge) int {
-	g.ResetOcurr()
-	total := 0
-	for _, edge := range cycle {
-		if edge.ocurr <= 0 {
-			total = total + edge.benefit - edge.cost
-			//fmt.Println("nuevo   ", edge, "total: ", total)
-		} else {
-			total = total - edge.cost
-			//fmt.Println("repetido", edge, "total: ", total)
-		}
-		g.AddOcurr(edge.start, edge.end)
-	}
-	return total
+	fmt.Println("Total: ", g.getPathBenefit(branchSol))
 }
 
 // Remove negative cycle from a solution
@@ -86,10 +70,10 @@ func removeNegativeCycle(g *Graph, path []*Edge) []*Edge {
 			end = path[j].end
 			if start == end {
 				//fmt.Println("i,j=", i, j)
-				if getCycleCost(g, path[i:j]) <= 0 {
-					fmt.Println("Removiendo ciclo negativo", path[i:j+1], "total: ", getCycleCost(g, path[i:j+1]))
+				if g.getPathBenefit(path[i:j]) <= 0 {
+					fmt.Println("Removiendo ciclo negativo", path[i:j+1], "total: ", g.getPathBenefit(path[i:j+1]))
 					path = append(path[:i], path[j+1:]...)
-					//fmt.Println("New Path", path, "total: ", getCycleCost(g, path))
+					//fmt.Println("New Path", path, "total: ", getPathBenefit(g, path))
 					i = i - 1
 					break
 				}
