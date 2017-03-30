@@ -15,7 +15,7 @@ import (
 
 func main() {
 
-	file, _ := os.Open("./instanciasPRPP/CHRISTOFIDES/P11NoRPP")
+	file, _ := os.Open("./instanciasPRPP/CHRISTOFIDES/P01NoRPP")
 	//file, _ := os.Open("./instanciasPRPP/RANDOM/R9NoRPP")
 	//file, _ := os.Open("./instanciasPRPP/DEGREE/D2NoRPP")
 	//file, _ := os.Open("./instanciasPRPP/GRID/G16NoRPP")

@@ -245,15 +245,17 @@ func (g *Graph) branchAndBound(e int, solParcial []*Edge, mejorSol []*Edge, bene
 			mejorSol = solParcial
 		}
 	}
-	fmt.Println(mejorSol)
+	//fmt.Println(mejorSol)
 	sucesores := g.obtenerListaSucesores(e)
+	fmt.Println("sucesores: ", sucesores)
 	for _, edge := range sucesores {
-		// if g.verifyConditions(g.edges[e][edge], solParcial, mejorSol) {
-		if !(g.estaEnSolucionParcial(edge, solParcial)) && g.cumpleAcotamiento(edge, solParcial, mejorSol, beneficioDisponible) && !g.checkNegativeCycle(edge, solParcial) {
+		fmt.Print("solParcial: ", solParcial)
+		fmt.Println("nodo: ", e, edge, "estaSolucionParcial", g.estaEnSolucionParcial(edge, solParcial), "cumpleAcotamiento: ", g.cumpleAcotamiento(edge, solParcial, mejorSol, beneficioDisponible), "Negative cycle: ", g.checkNegativeCycle(edge, solParcial))
+		if !g.estaEnSolucionParcial(edge, solParcial) && g.cumpleAcotamiento(edge, solParcial, mejorSol, beneficioDisponible) && !g.checkNegativeCycle(edge, solParcial) {
 			solParcial = append(solParcial, edge)
-			// g.AddEdge(g.edges[e.end][edge], solParcial)
 			beneficioDisponible = beneficioDisponible - int(math.Max(0, float64(edge.benefit-edge.cost)))
 			mejorSol = g.branchAndBound(edge.end, solParcial, mejorSol, beneficioDisponible)
+			break
 		}
 	}
 	solParcial = solParcial[:len(solParcial)-1] // edge = eliminarUltimoLado(solParcial)
