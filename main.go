@@ -22,8 +22,7 @@ func main() {
 	lineScanner := bufio.NewScanner(file)
 	line := 0
 	g := NewGraph(1)
-	beneficio := 0
-	// branchG := NewGraph(1)
+	maxBenefit := 0
 	for lineScanner.Scan() {
 		contents := strings.Fields(lineScanner.Text())
 		if line == 0 {
@@ -37,13 +36,17 @@ func main() {
 			cost, _ := strconv.ParseInt(contents[2], 0, 0)
 			benefit, _ := strconv.ParseInt(contents[3], 0, 0)
 			g.AddEdge(int(startNode), int(endNode), int(cost), int(benefit))
-			beneficio = beneficio + g.Benefit(int(startNode), int(endNode))
-			// branchG.AddEdge(int(startNode), int(endNode), int(cost), int(benefit))
+			fi := g.Benefit(int(startNode), int(endNode)) - g.Cost(int(startNode), int(endNode))
+			if fi >= 0 {
+				maxBenefit = maxBenefit + fi
+			}
+
+			//beneficio = beneficio + g.Benefit(int(startNode), int(endNode))
 		}
 		line++
 	}
 
-	var path []*Edge
+	var path []Edge
 	path = getCycleGRASP(g)
 
 	fmt.Println("Ciclo Greedy: ", path)
@@ -53,9 +56,10 @@ func main() {
 	fmt.Println("Nuevo ciclo sin negativo: ", path)
 	fmt.Println("Total: ", g.getPathBenefit(path))
 
-	var branchSol []*Edge
-	branchSol = make([]*Edge, 0, 0)
-	branchSol = g.branchAndBound(1, branchSol, path, beneficio)
+	var branchSol []Edge
+	branchSol = make([]Edge, 0, 0)
+	fmt.Println("Iniciando Branch and bound: MaxBeneficio=", maxBenefit)
+	_, branchSol, _ = g.branchAndBound(1, branchSol, path, maxBenefit)
 	fmt.Println("Ciclo Branch and bound: ", branchSol)
 	fmt.Println("Total: ", g.getPathBenefit(branchSol))
 	// fmt.Println(g.obtenerListaSucesores(1))
@@ -85,9 +89,9 @@ func removeNegativeCycle(g *Graph, path []*Edge) []*Edge {
 }
 
 // Get a initial solution using GRASP based Algorithm
-func getCycleGRASP(g *Graph) []*Edge {
-	var path []*Edge
-	var initialEdge *Edge
+func getCycleGRASP(g *Graph) []Edge {
+	var path []Edge
+	var initialEdge Edge
 	fmt.Println("Imprimiendo grafo\n", g)
 	fmt.Println("Lados positivos", g.positiveEdges)
 
@@ -99,7 +103,7 @@ func getCycleGRASP(g *Graph) []*Edge {
 		for _, node := range g.Neighbors(1) {
 			if g.Benefit(1, node)-g.Cost(1, node) > max {
 				max = g.Benefit(1, node) - g.Cost(1, node)
-				initialEdge = g.edges[1][node]
+				initialEdge = Edge{1, node, g.Benefit(1, nod), g.Cost(1, node), 0}
 			}
 		}
 		//fmt.Println("No hay lado positivo adyacente, seleccionando de E: ", initialEdge)
@@ -123,11 +127,17 @@ func getCycleGRASP(g *Graph) []*Edge {
 		if inPositiveEdges(pEdges, b) {
 			adjEdge = getEdge(pEdges, b) // Get Edge position adjacent to node g
 			if pEdges[adjEdge].start == b {
+				start = pEdges[adjEdge].start
 				b = pEdges[adjEdge].end
-				path = append(path, g.edges[pEdges[adjEdge].start][b])
 			} else if pEdges[adjEdge].end == b {
+				start = pEdges[adjEdge].end
 				b = pEdges[adjEdge].start
-				path = append(path, g.edges[pEdges[adjEdge].end][b])
+			}
+			if !g.Ocurr(start, b) {
+				path = append(path, Edge{start, b, g.Benefit(start, b), g.Cost(start, n), 0})
+				g.AddOcurr(start, b)
+			} else {
+				path = append(path, Edge{start, b, 0, g.Cost(start, n), 0})
 			}
 			//fmt.Println("Lado positivo aleatorio seleccionado", pEdges[adjEdge])
 			pEdges = append(pEdges[:adjEdge], pEdges[adjEdge+1:]...) // Delete Edge from list
@@ -169,7 +179,7 @@ func getCycleGRASP(g *Graph) []*Edge {
 	return path
 }
 
-//Check if node is in positiveEdges set
+//Check if node is in Edge set
 func inPositiveEdges(positiveEdges []*Edge, node int) bool {
 	for _, edge := range positiveEdges {
 		if edge.start == node || edge.end == node {

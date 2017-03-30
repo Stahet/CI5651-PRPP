@@ -202,7 +202,7 @@ func (g *Graph) Benefit(start, end int) int {
 	return g.edges[start][end].benefit
 }
 
-func (g *Graph) estaEnSolucionParcial(e *Edge, solParcial []*Edge) bool {
+func (g *Graph) estaEnSolucionParcial(e Edge, solParcial []*Edge) bool {
 	ocurr := 0
 	for _, edge := range solParcial {
 		if edge.equals(e) {
@@ -215,7 +215,7 @@ func (g *Graph) estaEnSolucionParcial(e *Edge, solParcial []*Edge) bool {
 	return false
 }
 
-func (g *Graph) obtenerListaSucesores(v int) []*Edge {
+func (g *Graph) obtenerListaSucesores(v int) []Edge {
 	lista := Edges{}
 	newlist := make([]*Edge, 0, len(g.edges[v])*2)
 	for _, edge := range g.edges[v] {
@@ -223,58 +223,67 @@ func (g *Graph) obtenerListaSucesores(v int) []*Edge {
 		lista = append(lista, Edge{edge.start, edge.end, edge.cost, 0, 0})
 	}
 	sort.Sort(sort.Reverse(lista))
-	for _, edge := range lista {
-		newlist = append(newlist, g.edges[edge.start][edge.end])
-	}
-	return newlist
+	return lista
 }
 
-func (g *Graph) cumpleAcotamiento(e *Edge, solParcial []*Edge, mejorSol []*Edge, beneficioDisponible int) bool {
+func (g *Graph) cumpleAcotamiento(e Edge, solParcial []Edge, mejorSol []Edge, beneficioDisponible int) bool {
 	beneficioE := e.benefit - e.cost
-	beneficioSolParcial := g.getPathBenefit(solParcial) + beneficioE
+	beneficioSolParcial := beneficio(solParcial) + beneficioE
 	maxBeneficio := beneficioDisponible - int(math.Max(0, float64(beneficioE))) + beneficioSolParcial
-	if maxBeneficio <= g.getPathBenefit(mejorSol) {
+	if maxBeneficio <= beneficio(mejorSol) {
 		return false
 	}
 	return true
 }
 
-func (g *Graph) branchAndBound(e int, solParcial []*Edge, mejorSol []*Edge, beneficioDisponible int) []*Edge {
+func (g *Graph) branchAndBound(e int, solParcial []Edge, mejorSol []Edge, beneficioDisponible int) ([]Edge, []Edge, int) {
 	if e == 1 {
-		if g.getPathBenefit(solParcial) > g.getPathBenefit(mejorSol) {
+		if beneficio(solParcial) > beneficio(mejorSol) {
 			mejorSol = solParcial
 		}
 	}
 	//fmt.Println(mejorSol)
 	sucesores := g.obtenerListaSucesores(e)
-	fmt.Println("sucesores: ", sucesores)
+	//fmt.Println("sucesores: ", sucesores)
+	i := 1
 	for _, edge := range sucesores {
 		fmt.Print("solParcial: ", solParcial)
-		fmt.Println("nodo: ", e, edge, "estaSolucionParcial", g.estaEnSolucionParcial(edge, solParcial), "cumpleAcotamiento: ", g.cumpleAcotamiento(edge, solParcial, mejorSol, beneficioDisponible), "Negative cycle: ", g.checkNegativeCycle(edge, solParcial))
+		fmt.Println("nodo: ", e, edge, "estaSolucionParcial", g.estaEnSolucionParcial(edge, solParcial), "cumpleAcotamiento: ", g.cumpleAcotamiento(edge, solParcial, mejorSol, beneficioDisponible), "Negative cycle: ", g.checkNegativeCycle(edge, solParcial), "beneficio disponible", beneficioDisponible, "cumple", !g.estaEnSolucionParcial(edge, solParcial) && g.cumpleAcotamiento(edge, solParcial, mejorSol, beneficioDisponible) && !g.checkNegativeCycle(edge, solParcial))
 		if !g.estaEnSolucionParcial(edge, solParcial) && g.cumpleAcotamiento(edge, solParcial, mejorSol, beneficioDisponible) && !g.checkNegativeCycle(edge, solParcial) {
 			solParcial = append(solParcial, edge)
 			beneficioDisponible = beneficioDisponible - int(math.Max(0, float64(edge.benefit-edge.cost)))
-			mejorSol = g.branchAndBound(edge.end, solParcial, mejorSol, beneficioDisponible)
-			break
+			solParcial, mejorSol, beneficioDisponible = g.branchAndBound(edge.end, solParcial, mejorSol, beneficioDisponible)
+			if i == 2 {
+				break
+			}
+			i++
 		}
 	}
 	solParcial = solParcial[:len(solParcial)-1] // edge = eliminarUltimoLado(solParcial)
 	ultimo := solParcial[len(solParcial)-1]
 	beneficioDisponible = beneficioDisponible + int(math.Max(0, float64(ultimo.benefit-ultimo.cost)))
-	return mejorSol
+	return solParcial, mejorSol, beneficioDisponible
 }
 
-func (g *Graph) checkNegativeCycle(e *Edge, solParcial []*Edge) bool {
+func (g *Graph) checkNegativeCycle(e Edge, solParcial []Edge) bool {
 	path := append(solParcial, e)
 	for index, edge := range solParcial {
 		if edge.start == e.end {
-			totalBenefit = g.getPathBenefit(path[index:])
+			totalBenefit = benefit(path[index:])
 			if totalBenefit < 0 {
 				return true
 			}
 		}
 	}
 	return false
+}
+
+func beneficio(path []Edge) int {
+	total := 0
+	for _, edge := range path {
+		total = total + edge.benefit - edge.cost
+	}
+	return total
 }
 
 func (g *Graph) getPathBenefit(path []*Edge) int {
@@ -291,6 +300,10 @@ func (g *Graph) getPathBenefit(path []*Edge) int {
 		g.AddOcurr(edge.start, edge.end)
 	}
 	return total
+}
+
+func (g *Graph) Ocurr(start, end int) bool {
+	return g.edges[start][end].ocurr > 0
 }
 
 // func (g *Graph) verifyConditions(e *Edge, solParcial []*Edge, mejorSol []*Edge) bool {
