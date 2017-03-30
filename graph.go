@@ -49,6 +49,20 @@ func (g *Graph) String() string {
 	return s
 }
 
+type Edges []Edge
+
+func (slice Edges) Len() int {
+	return len(slice)
+}
+
+func (slice Edges) Less(i, j int) bool {
+	return (float64(slice[i].benefit) - float64(slice[i].cost)) < (float64(slice[j].benefit) - float64(slice[j].cost))
+}
+
+func (slice Edges) Swap(i, j int) {
+	slice[i], slice[j] = slice[j], slice[i]
+}
+
 // AddEdge function to ad edges to a graph
 func (g *Graph) AddEdge(start, end, cost, benefit int) {
 
@@ -202,7 +216,7 @@ func (g *Graph) estaEnSolucionParcial(e *Edge, solParcial []*Edge) bool {
 }
 
 func (g *Graph) obtenerListaSucesores(v int) []*Edge {
-	var lista Edges
+	lista := Edges{}
 	newlist := make([]*Edge, 0, len(g.edges[v])*2)
 	for _, edge := range g.edges[v] {
 		lista = append(lista, Edge{edge.start, edge.end, edge.cost, edge.benefit, 0})
@@ -231,24 +245,21 @@ func (g *Graph) branchAndBound(e int, solParcial []*Edge, mejorSol []*Edge, bene
 			mejorSol = solParcial
 		}
 	}
+	fmt.Println(mejorSol)
 	sucesores := g.obtenerListaSucesores(e)
 	for _, edge := range sucesores {
-		// fmt.Println(g.verifyConditions(g.edges[e][edge], solParcial, mejorSol))
 		// if g.verifyConditions(g.edges[e][edge], solParcial, mejorSol) {
-		if !(g.estaEnSolucionParcial(edge, solParcial)) && g.cumpleAcotamiento(edge, solParcial, mejorSol, beneficioDisponible) && g.checkNegativeCycle(edge, solParcial) {
+		if !(g.estaEnSolucionParcial(edge, solParcial)) && g.cumpleAcotamiento(edge, solParcial, mejorSol, beneficioDisponible) && !g.checkNegativeCycle(edge, solParcial) {
 			solParcial = append(solParcial, edge)
-			// fmt.Println(beneficioDisponible)
 			// g.AddEdge(g.edges[e.end][edge], solParcial)
 			beneficioDisponible = beneficioDisponible - int(math.Max(0, float64(edge.benefit-edge.cost)))
-			g.branchAndBound(edge.end, solParcial, mejorSol, beneficioDisponible)
+			mejorSol = g.branchAndBound(edge.end, solParcial, mejorSol, beneficioDisponible)
 		}
-		fmt.Println(solParcial)
 	}
 	solParcial = solParcial[:len(solParcial)-1] // edge = eliminarUltimoLado(solParcial)
 	ultimo := solParcial[len(solParcial)-1]
 	beneficioDisponible = beneficioDisponible + int(math.Max(0, float64(ultimo.benefit-ultimo.cost)))
-	fmt.Println("Sali Mas")
-	return solParcial
+	return mejorSol
 }
 
 func (g *Graph) checkNegativeCycle(e *Edge, solParcial []*Edge) bool {
@@ -292,18 +303,4 @@ func NewGraph(nodes int) *Graph {
 		g.edges[i] = tmap
 	}
 	return g
-}
-
-type Edges []Edge
-
-func (slice Edges) Len() int {
-	return len(slice)
-}
-
-func (slice Edges) Less(i, j int) bool {
-	return slice[i].benefit-slice[i].cost < slice[j].benefit-slice[j].cost
-}
-
-func (slice Edges) Swap(i, j int) {
-	slice[i], slice[j] = slice[j], slice[i]
 }

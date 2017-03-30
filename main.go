@@ -15,7 +15,7 @@ import (
 
 func main() {
 
-	file, _ := os.Open("./instanciasPRPP/CHRISTOFIDES/P02NoRPP")
+	file, _ := os.Open("./instanciasPRPP/CHRISTOFIDES/P11NoRPP")
 	//file, _ := os.Open("./instanciasPRPP/RANDOM/R9NoRPP")
 	//file, _ := os.Open("./instanciasPRPP/DEGREE/D2NoRPP")
 	//file, _ := os.Open("./instanciasPRPP/GRID/G16NoRPP")
@@ -58,7 +58,7 @@ func main() {
 	branchSol = g.branchAndBound(1, branchSol, path, beneficio)
 	fmt.Println("Ciclo Branch and bound: ", branchSol)
 	fmt.Println("Total: ", g.getPathBenefit(branchSol))
-	fmt.Println(g.obtenerListaSucesores(1))
+	// fmt.Println(g.obtenerListaSucesores(1))
 }
 
 // Remove negative cycle from a solution
