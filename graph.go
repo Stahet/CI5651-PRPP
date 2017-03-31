@@ -217,33 +217,3 @@ func (g *Graph) NetBenefit(start, end int) int {
 	return -edge.cost
 
 }
-
-// Get path total benefit
-func getPathBenefit(path []*Edge) int {
-	seen := make(map[int]int)
-	total := 0
-	for _, edge := range path {
-		if _, ok := seen[edge.start]; ok && (edge.end == seen[edge.start] || edge.start == seen[edge.end]) {
-			total = total - edge.cost
-		} else {
-			total = total + edge.benefit - edge.cost
-			seen[edge.start] = edge.end
-			seen[edge.end] = edge.start
-		}
-	}
-	return total
-}
-
-func (g *Graph) checkNegativeCycle(e *Edge, solParcial []*Edge) bool {
-	path := append(solParcial, e)
-	totalBenefit := 0
-	for index, edge := range solParcial {
-		if edge.start == e.end {
-			totalBenefit = getPathBenefit(path[index:])
-			if totalBenefit < 0 {
-				return true
-			}
-		}
-	}
-	return false
-}
