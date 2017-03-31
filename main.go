@@ -57,7 +57,7 @@ func main() {
 
 	var branchSol []*Edge
 	branchSol = make([]*Edge, 0, 0)
-	//_, branchSol, _ = g.branchAndBound(1, branchSol, path, maxBenefit)
+	_, branchSol, _ = g.branchAndBound(1, branchSol, path, maxBenefit)
 	fmt.Println("Ciclo Branch and bound: ", branchSol)
 	fmt.Println("Total: ", getPathBenefit(branchSol))
 	// fmt.Println(g.obtenerListaSucesores(1))
