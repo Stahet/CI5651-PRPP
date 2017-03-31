@@ -6,7 +6,7 @@ import (
 	"sort"
 )
 
-func (g *Graph) estaEnSolucionParcial(e *Edge, solParcial []*Edge) bool {
+func estaEnSolucionParcial(e *Edge, solParcial []*Edge) bool {
 	ocurr := 0
 	for _, edge := range solParcial {
 		if edge.equals(e) {
@@ -57,9 +57,9 @@ func (g *Graph) branchAndBound(e int, solParcial []*Edge, mejorSol []*Edge, bene
 	fmt.Print("solParcial: ", solParcial, "benef:", getPathBenefit(solParcial))
 	fmt.Println("sucesores: ", sucesores)
 	for _, edge := range sucesores {
-		estaSolParcial = g.estaEnSolucionParcial(edge, solParcial)
+		estaSolParcial = estaEnSolucionParcial(edge, solParcial)
 		cumpleAco = g.cumpleAcotamiento(edge, solParcial, mejorSol, beneficioDisponible)
-		cicloNeg = g.checkNegativeCycle(edge, solParcial)
+		cicloNeg = checkNegativeCycle(edge, solParcial)
 		fmt.Println("nodo:", e, "lado: ", edge, "| netB:", g.NetBenefit(edge.start, edge.end), "| estaSolPar:", estaSolParcial, "| cumpleAc:", cumpleAco, "| NegCycle:", cicloNeg, "| benefDisponible:", beneficioDisponible, "| cond:", !estaSolParcial && cumpleAco && !cicloNeg)
 
 		if !estaSolParcial && cumpleAco && !cicloNeg {
@@ -81,4 +81,34 @@ func (g *Graph) branchAndBound(e int, solParcial []*Edge, mejorSol []*Edge, bene
 		g.AddOcurr(ultimo.start, ultimo.end)
 	}
 	return solParcial, mejorSol, beneficioDisponible
+}
+
+// Get path total benefit
+func getPathBenefit(path []*Edge) int {
+	seen := make(map[int]int)
+	total := 0
+	for _, edge := range path {
+		if _, ok := seen[edge.start]; ok && (edge.end == seen[edge.start] || edge.start == seen[edge.end]) {
+			total = total - edge.cost
+		} else {
+			total = total + edge.benefit - edge.cost
+			seen[edge.start] = edge.end
+			seen[edge.end] = edge.start
+		}
+	}
+	return total
+}
+
+func checkNegativeCycle(e *Edge, solParcial []*Edge) bool {
+	path := append(solParcial, e)
+	totalBenefit := 0
+	for index, edge := range solParcial {
+		if edge.start == e.end {
+			totalBenefit = getPathBenefit(path[index:])
+			if totalBenefit < 0 {
+				return true
+			}
+		}
+	}
+	return false
 }
