@@ -59,7 +59,7 @@ func main() {
 
 	var branchSol []*Edge
 	branchSol = make([]*Edge, 0, 0)
-	branchSol = g.branchAndBound(1, branchSol, path, maxBenefit)
+	_, branchSol, _ = g.branchAndBound(1, branchSol, path, maxBenefit)
 	fmt.Println("Ciclo Branch and bound: ", branchSol)
 	fmt.Println("Total: ", g.getPathBenefit(branchSol))
 	// fmt.Println(g.obtenerListaSucesores(1))
@@ -76,7 +76,7 @@ func removeNegativeCycle(g *Graph, path []*Edge) []*Edge {
 			if start == end {
 				//fmt.Println("i,j=", i, j)
 				if g.getPathBenefit(path[i:j]) <= 0 {
-					fmt.Println("Removiendo ciclo negativo", path[i:j+1], "total: ", g.getPathBenefit(path[i:j+1]))
+					//fmt.Println("Removiendo ciclo negativo", path[i:j+1], "total: ", g.getPathBenefit(path[i:j+1]))
 					path = append(path[:i], path[j+1:]...)
 					//fmt.Println("New Path", path, "total: ", getPathBenefit(g, path))
 					i = i - 1

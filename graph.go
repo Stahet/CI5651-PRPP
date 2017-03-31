@@ -247,7 +247,7 @@ func (g *Graph) obtenerListaSucesores(v int) []*Edge {
 
 func (g *Graph) cumpleAcotamiento(e *Edge, solParcial []*Edge, mejorSol []*Edge, beneficioDisponible int) bool {
 	beneficioE := g.NetBenefit(e.start, e.end)
-	//fmt.Println("Beneficio E: ", beneficioE)
+	fmt.Println(e, "Beneficio E: ", beneficioE)
 	beneficioSolParcial := g.getPathBenefit(solParcial) + beneficioE
 	maxBeneficio := beneficioDisponible - int(math.Max(0, float64(beneficioE))) + beneficioSolParcial
 	if maxBeneficio <= g.getPathBenefit(mejorSol) {
@@ -256,7 +256,7 @@ func (g *Graph) cumpleAcotamiento(e *Edge, solParcial []*Edge, mejorSol []*Edge,
 	return true
 }
 
-func (g *Graph) branchAndBound(e int, solParcial []*Edge, mejorSol []*Edge, beneficioDisponible int) []*Edge {
+func (g *Graph) branchAndBound(e int, solParcial []*Edge, mejorSol []*Edge, beneficioDisponible int) ([]*Edge, []*Edge, int) {
 	if e == 1 {
 		if g.getPathBenefit(solParcial) > g.getPathBenefit(mejorSol) {
 			mejorSol = solParcial
@@ -268,7 +268,6 @@ func (g *Graph) branchAndBound(e int, solParcial []*Edge, mejorSol []*Edge, bene
 	fmt.Print("solParcial: ", solParcial)
 	fmt.Println("sucesores: ", sucesores)
 	for _, edge := range sucesores {
-
 		estaSolParcial = g.estaEnSolucionParcial(edge, solParcial)
 		cumpleAco = g.cumpleAcotamiento(edge, solParcial, mejorSol, beneficioDisponible)
 		cicloNeg = g.checkNegativeCycle(edge, solParcial)
@@ -279,14 +278,20 @@ func (g *Graph) branchAndBound(e int, solParcial []*Edge, mejorSol []*Edge, bene
 			solParcial = append(solParcial, edge)
 			beneficioDisponible = beneficioDisponible - int(math.Max(0, float64(g.NetBenefit(edge.start, edge.end))))
 			g.AddOcurr(edge.start, edge.end)
-			mejorSol = g.branchAndBound(edge.end, solParcial, mejorSol, beneficioDisponible)
+			solParcial, mejorSol, beneficioDisponible = g.branchAndBound(edge.end, solParcial, mejorSol, beneficioDisponible)
 			g.RemoveOcurr(edge.start, edge.end)
 		}
 	}
-	solParcial = solParcial[:len(solParcial)-1] // edge = eliminarUltimoLado(solParcial)
-	ultimo := solParcial[len(solParcial)-1]
-	beneficioDisponible = beneficioDisponible + int(math.Max(0, float64(ultimo.benefit-ultimo.cost)))
-	return mejorSol
+	if len(solParcial) >= 1 {
+		fmt.Println("solParcial: ", solParcial)
+		ultimo := solParcial[len(solParcial)-1]
+		solParcial = solParcial[:len(solParcial)-1] // edge = eliminarUltimoLado(solParcial)
+		g.RemoveOcurr(ultimo.start, ultimo.end)
+		fmt.Println("Quitar ultimo:", ultimo, "ocurr:", ultimo.ocurr, "netB:", g.NetBenefit(ultimo.start, ultimo.end))
+		beneficioDisponible = beneficioDisponible + int(math.Max(0, float64(g.NetBenefit(ultimo.start, ultimo.end))))
+		g.AddOcurr(ultimo.start, ultimo.end)
+	}
+	return solParcial, mejorSol, beneficioDisponible
 }
 
 func (g *Graph) checkNegativeCycle(e *Edge, solParcial []*Edge) bool {
