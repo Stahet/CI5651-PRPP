@@ -246,7 +246,8 @@ func (g *Graph) obtenerListaSucesores(v int) []*Edge {
 }
 
 func (g *Graph) cumpleAcotamiento(e *Edge, solParcial []*Edge, mejorSol []*Edge, beneficioDisponible int) bool {
-	beneficioE := e.benefit - e.cost
+	beneficioE := g.NetBenefit(e.start, e.end)
+	//fmt.Println("Beneficio E: ", beneficioE)
 	beneficioSolParcial := g.getPathBenefit(solParcial) + beneficioE
 	maxBeneficio := beneficioDisponible - int(math.Max(0, float64(beneficioE))) + beneficioSolParcial
 	if maxBeneficio <= g.getPathBenefit(mejorSol) {
@@ -264,22 +265,22 @@ func (g *Graph) branchAndBound(e int, solParcial []*Edge, mejorSol []*Edge, bene
 	//fmt.Println(mejorSol)
 	sucesores := g.obtenerListaSucesores(e)
 	estaSolParcial, cumpleAco, cicloNeg := true, true, true
+	fmt.Print("solParcial: ", solParcial)
 	fmt.Println("sucesores: ", sucesores)
 	for _, edge := range sucesores {
 
-		fmt.Print("solParcial: ", solParcial)
-		fmt.Println("nodo: ", e, edge, "netBenefit: ", g.NetBenefit(edge.start, edge.end), "estaSolucionParcial", g.estaEnSolucionParcial(edge, solParcial), "cumpleAcotamiento: ", g.cumpleAcotamiento(edge, solParcial, mejorSol, beneficioDisponible), "Negative cycle: ", g.checkNegativeCycle(edge, solParcial), "b Disponible: ", beneficioDisponible, "cond: ", !g.estaEnSolucionParcial(edge, solParcial) && g.cumpleAcotamiento(edge, solParcial, mejorSol, beneficioDisponible) && !g.checkNegativeCycle(edge, solParcial))
 		estaSolParcial = g.estaEnSolucionParcial(edge, solParcial)
 		cumpleAco = g.cumpleAcotamiento(edge, solParcial, mejorSol, beneficioDisponible)
 		cicloNeg = g.checkNegativeCycle(edge, solParcial)
+		fmt.Println("nodo:", e, "lado: ", edge, "| netB:", g.NetBenefit(edge.start, edge.end), "| estaSolPar:", estaSolParcial, "| cumpleAc:", cumpleAco, "| NegCycle:", cicloNeg, "| benefDisponible:", beneficioDisponible, "| cond:", !estaSolParcial && cumpleAco && !cicloNeg)
 
 		if !estaSolParcial && cumpleAco && !cicloNeg {
+			fmt.Println()
 			solParcial = append(solParcial, edge)
-			g.AddOcurr(edge.start, edge.end)
 			beneficioDisponible = beneficioDisponible - int(math.Max(0, float64(g.NetBenefit(edge.start, edge.end))))
+			g.AddOcurr(edge.start, edge.end)
 			mejorSol = g.branchAndBound(edge.end, solParcial, mejorSol, beneficioDisponible)
 			g.RemoveOcurr(edge.start, edge.end)
-			break
 		}
 	}
 	solParcial = solParcial[:len(solParcial)-1] // edge = eliminarUltimoLado(solParcial)

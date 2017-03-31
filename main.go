@@ -15,7 +15,7 @@ import (
 
 func main() {
 
-	file, _ := os.Open("./instanciasPRPP/CHRISTOFIDES/P01NoRPP")
+	file, _ := os.Open("./instanciasPRPP/CHRISTOFIDES/P11NoRPP")
 	//file, _ := os.Open("./instanciasPRPP/RANDOM/R9NoRPP")
 	//file, _ := os.Open("./instanciasPRPP/DEGREE/D2NoRPP")
 	//file, _ := os.Open("./instanciasPRPP/GRID/G16NoRPP")
@@ -59,7 +59,7 @@ func main() {
 
 	var branchSol []*Edge
 	branchSol = make([]*Edge, 0, 0)
-	//branchSol = g.branchAndBound(1, branchSol, path, maxBenefit)
+	branchSol = g.branchAndBound(1, branchSol, path, maxBenefit)
 	fmt.Println("Ciclo Branch and bound: ", branchSol)
 	fmt.Println("Total: ", g.getPathBenefit(branchSol))
 	// fmt.Println(g.obtenerListaSucesores(1))
