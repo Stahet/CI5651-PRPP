@@ -19,7 +19,7 @@ func removeNegativeCycle(g *Graph, path []*Edge) []*Edge {
 			end = path[j].end
 			if start == end {
 				//fmt.Println("i,j=", i, j)
-				if g.getPathBenefit(path[i:j]) <= 0 {
+				if getPathBenefit(path[i:j]) <= 0 {
 					path = append(path[:i], path[j+1:]...)
 					i = i - 1
 					break

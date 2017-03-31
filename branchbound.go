@@ -36,10 +36,10 @@ func (g *Graph) obtenerListaSucesores(v int) []*Edge {
 func (g *Graph) cumpleAcotamiento(e *Edge, solParcial []*Edge, mejorSol []*Edge, beneficioDisponible int) bool {
 	beneficioE := g.NetBenefit(e.start, e.end)
 	//fmt.Println(e, "Beneficio E: ", beneficioE)
-	beneficioSolParcial := g.getPathBenefit(solParcial) + beneficioE
-	fmt.Println("SolParcialBenefit", beneficioSolParcial, "beneficioMejor:", g.getPathBenefit(mejorSol))
+	beneficioSolParcial := getPathBenefit(solParcial) + beneficioE
+	fmt.Println("SolParcialBenefit", beneficioSolParcial, "beneficioMejor:", getPathBenefit(mejorSol))
 	maxBeneficio := beneficioDisponible - int(math.Max(0, float64(beneficioE))) + beneficioSolParcial
-	if maxBeneficio <= g.getPathBenefit(mejorSol) {
+	if maxBeneficio <= getPathBenefit(mejorSol) {
 		return false
 	}
 	return true
@@ -47,14 +47,14 @@ func (g *Graph) cumpleAcotamiento(e *Edge, solParcial []*Edge, mejorSol []*Edge,
 
 func (g *Graph) branchAndBound(e int, solParcial []*Edge, mejorSol []*Edge, beneficioDisponible int) ([]*Edge, []*Edge, int) {
 	if e == 1 {
-		if g.getPathBenefit(solParcial) > g.getPathBenefit(mejorSol) {
+		if getPathBenefit(solParcial) > getPathBenefit(mejorSol) {
 			mejorSol = solParcial
 		}
 	}
 	//fmt.Println(mejorSol)
 	sucesores := g.obtenerListaSucesores(e)
 	estaSolParcial, cumpleAco, cicloNeg := true, true, true
-	fmt.Print("solParcial: ", solParcial, "benef:", g.getPathBenefit(solParcial))
+	fmt.Print("solParcial: ", solParcial, "benef:", getPathBenefit(solParcial))
 	fmt.Println("sucesores: ", sucesores)
 	for _, edge := range sucesores {
 		estaSolParcial = g.estaEnSolucionParcial(edge, solParcial)

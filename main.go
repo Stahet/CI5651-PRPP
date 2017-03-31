@@ -49,16 +49,16 @@ func main() {
 	path = getCycleGRASP(g)
 
 	fmt.Println("Ciclo Greedy: ", path)
-	fmt.Println("Total: ", g.getPathBenefit(path))
+	fmt.Println("Total: ", getPathBenefit(path))
 
 	path = removeNegativeCycle(g, path)
 	fmt.Println("Nuevo ciclo sin negativo: ", path)
-	fmt.Println("Total: ", g.getPathBenefit(path))
+	fmt.Println("Total: ", getPathBenefit(path))
 
 	var branchSol []*Edge
 	branchSol = make([]*Edge, 0, 0)
 	//_, branchSol, _ = g.branchAndBound(1, branchSol, path, maxBenefit)
 	fmt.Println("Ciclo Branch and bound: ", branchSol)
-	fmt.Println("Total: ", g.getPathBenefit(branchSol))
+	fmt.Println("Total: ", getPathBenefit(branchSol))
 	// fmt.Println(g.obtenerListaSucesores(1))
 }

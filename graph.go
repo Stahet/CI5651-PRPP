@@ -219,7 +219,7 @@ func (g *Graph) NetBenefit(start, end int) int {
 }
 
 // Get path total benefit
-func (g *Graph) getPathBenefit(path []*Edge) int {
+func getPathBenefit(path []*Edge) int {
 	seen := make(map[int]int)
 	total := 0
 	for _, edge := range path {
@@ -239,7 +239,7 @@ func (g *Graph) checkNegativeCycle(e *Edge, solParcial []*Edge) bool {
 	totalBenefit := 0
 	for index, edge := range solParcial {
 		if edge.start == e.end {
-			totalBenefit = g.getPathBenefit(path[index:])
+			totalBenefit = getPathBenefit(path[index:])
 			if totalBenefit < 0 {
 				return true
 			}
