@@ -104,6 +104,12 @@ func (g *Graph) AddOcurr(start, end int) {
 	g.edges[end][start].ocurr = g.edges[end][start].ocurr + 1
 }
 
+// Remove function to remove ocurrence to an edge
+func (g *Graph) RemoveOcurr(start, end int) {
+	g.edges[start][end].ocurr = g.edges[start][end].ocurr - 1
+	g.edges[end][start].ocurr = g.edges[end][start].ocurr - 1
+}
+
 func (g *Graph) ResetOcurr() {
 	for _, v := range g.edges {
 		for _, edge := range v {
@@ -202,6 +208,16 @@ func (g *Graph) Benefit(start, end int) int {
 	return g.edges[start][end].benefit
 }
 
+func (g *Graph) NetBenefit(start, end int) int {
+	edge := g.edges[start][end]
+	if edge.ocurr <= 0 {
+		//fmt.Println("nuevo   ", edge, "total: ", total)
+		return edge.benefit - edge.cost
+	}
+	//fmt.Println("repetido", edge, "total: ", total)
+	return -edge.cost
+
+}
 func (g *Graph) estaEnSolucionParcial(e *Edge, solParcial []*Edge) bool {
 	ocurr := 0
 	for _, edge := range solParcial {
@@ -250,7 +266,7 @@ func (g *Graph) branchAndBound(e int, solParcial []*Edge, mejorSol []*Edge, bene
 	fmt.Println("sucesores: ", sucesores)
 	for _, edge := range sucesores {
 		fmt.Print("solParcial: ", solParcial)
-		fmt.Println("nodo: ", e, edge, "estaSolucionParcial", g.estaEnSolucionParcial(edge, solParcial), "cumpleAcotamiento: ", g.cumpleAcotamiento(edge, solParcial, mejorSol, beneficioDisponible), "Negative cycle: ", g.checkNegativeCycle(edge, solParcial))
+		fmt.Println("nodo: ", e, edge, "estaSolucionParcial", g.estaEnSolucionParcial(edge, solParcial), "cumpleAcotamiento: ", g.cumpleAcotamiento(edge, solParcial, mejorSol, beneficioDisponible), "Negative cycle: ", g.checkNegativeCycle(edge, solParcial), "b Disponible: ", beneficioDisponible, "cond: ", !g.estaEnSolucionParcial(edge, solParcial) && g.cumpleAcotamiento(edge, solParcial, mejorSol, beneficioDisponible) && !g.checkNegativeCycle(edge, solParcial))
 		if !g.estaEnSolucionParcial(edge, solParcial) && g.cumpleAcotamiento(edge, solParcial, mejorSol, beneficioDisponible) && !g.checkNegativeCycle(edge, solParcial) {
 			solParcial = append(solParcial, edge)
 			beneficioDisponible = beneficioDisponible - int(math.Max(0, float64(edge.benefit-edge.cost)))
@@ -281,13 +297,7 @@ func (g *Graph) getPathBenefit(path []*Edge) int {
 	g.ResetOcurr()
 	total := 0
 	for _, edge := range path {
-		if edge.ocurr <= 0 {
-			total = total + edge.benefit - edge.cost
-			//fmt.Println("nuevo   ", edge, "total: ", total)
-		} else {
-			total = total - edge.cost
-			//fmt.Println("repetido", edge, "total: ", total)
-		}
+		total = total + g.NetBenefit(edge.start, edge.end)
 		g.AddOcurr(edge.start, edge.end)
 	}
 	return total

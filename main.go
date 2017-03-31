@@ -22,7 +22,7 @@ func main() {
 	lineScanner := bufio.NewScanner(file)
 	line := 0
 	g := NewGraph(1)
-	beneficio := 0
+	maxBenefit, b, c := 0, 0, 0
 	// branchG := NewGraph(1)
 	for lineScanner.Scan() {
 		contents := strings.Fields(lineScanner.Text())
@@ -37,7 +37,11 @@ func main() {
 			cost, _ := strconv.ParseInt(contents[2], 0, 0)
 			benefit, _ := strconv.ParseInt(contents[3], 0, 0)
 			g.AddEdge(int(startNode), int(endNode), int(cost), int(benefit))
-			beneficio = beneficio + g.Benefit(int(startNode), int(endNode))
+			b = g.Benefit(int(startNode), int(endNode))
+			c = g.Cost(int(startNode), int(endNode))
+			if b-c >= 0 {
+				maxBenefit = maxBenefit + b - c
+			}
 			// branchG.AddEdge(int(startNode), int(endNode), int(cost), int(benefit))
 		}
 		line++
@@ -55,7 +59,7 @@ func main() {
 
 	var branchSol []*Edge
 	branchSol = make([]*Edge, 0, 0)
-	branchSol = g.branchAndBound(1, branchSol, path, beneficio)
+	branchSol = g.branchAndBound(1, branchSol, path, maxBenefit)
 	fmt.Println("Ciclo Branch and bound: ", branchSol)
 	fmt.Println("Total: ", g.getPathBenefit(branchSol))
 	// fmt.Println(g.obtenerListaSucesores(1))
