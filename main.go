@@ -17,8 +17,8 @@ func main() {
 
 	//file, _ := os.Open("./instanciasPRPP/CHRISTOFIDES/P14NoRPP")
 	//file, _ := os.Open("./instanciasPRPP/RANDOM/R9NoRPP")
-	file, _ := os.Open("./instanciasPRPP/DEGREE/D2NoRPP")
-	//file, _ := os.Open("./instanciasPRPP/GRID/G16NoRPP")
+	//file, _ := os.Open("./instanciasPRPP/DEGREE/D6NoRPP")
+	file, _ := os.Open("./instanciasPRPP/GRID/G15NoRPP")
 	lineScanner := bufio.NewScanner(file)
 	line := 0
 	g := NewGraph(1)
