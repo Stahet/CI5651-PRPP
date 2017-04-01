@@ -1,0 +1,16 @@
+main.exe G0NoRPP 0
+main.exe G1NoRPP 0
+main.exe G2NoRPP 0
+main.exe G3NoRPP 2
+main.exe G4NoRPP 0
+main.exe G5NoRPP 4
+main.exe G6NoRPP 9
+main.exe G7NoRPP 1
+main.exe G8NoRPP 4
+main.exe G9NoRPP 2
+main.exe G10NoRPP 0
+main.exe G11NoRPP 4
+main.exe G12NoRPP 15
+main.exe G13NoRPP 11
+main.exe G14NoRPP 14
+main.exe G15NoRPP 26

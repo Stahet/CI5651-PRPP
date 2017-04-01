@@ -1,0 +1,11 @@
+main.exe R0NoRPP 1742
+main.exe R1NoRPP 4253
+main.exe R2NoRPP 5638
+main.exe R3NoRPP 18453
+main.exe R4NoRPP 17316
+main.exe R5NoRPP 298
+main.exe R6NoRPP 12478
+main.exe R7NoRPP 9405
+main.exe R8NoRPP 14847
+main.exe R9NoRPP 17523
+main.exe R10NoRPP 17405

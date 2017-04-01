@@ -1,0 +1,15 @@
+main.exe D0NoRPP 109
+main.exe D1NoRPP 115
+main.exe D2NoRPP 274
+main.exe D3NoRPP 172
+main.exe D4NoRPP 210
+main.exe D5NoRPP 313
+main.exe D6NoRPP 166
+main.exe D7NoRPP 260
+main.exe D8NoRPP 457
+main.exe D9NoRPP 160
+main.exe D10NoRPP 0
+main.exe D11NoRPP 398
+main.exe D12NoRPP 280
+main.exe D13NoRPP 717
+main.exe D14NoRPP 810
