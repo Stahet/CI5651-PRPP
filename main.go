@@ -68,6 +68,7 @@ func main() {
 	}
 	beneficioDisponible = maxBenefit // Global variable maxBenefit
 	_ = time.AfterFunc(time.Duration(90)*time.Minute, func() {
+		fmt.Println("Archivo: ", args[1])
 		fmt.Println("Tiempo limite excedido")
 		os.Exit(2)
 	})
