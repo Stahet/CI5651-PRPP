@@ -1,7 +1,16 @@
+/**
+ * branchbound.go
+ *
+ * Implementation of a Branch and Bound algorithm to solve the PRPP problem
+ *
+ * Author : Jonnathan Ng
+ *          Daniel Rodriguez
+ */
+
 package main
 
 import (
-	"fmt"
+	//"fmt"
 	"math"
 	"sort"
 )
@@ -23,8 +32,8 @@ func (g *Graph) obtenerListaSucesores(v int) []*Edge {
 	lista := Edges{}
 	newlist := make([]*Edge, 0, len(g.edges[v])*2)
 	for _, edge := range g.edges[v] {
-		lista = append(lista, Edge{edge.start, edge.end, edge.cost, edge.benefit, 0})
-		lista = append(lista, Edge{edge.start, edge.end, edge.cost, 0, 0})
+		lista = append(lista, Edge{edge.start, edge.end, edge.cost, edge.benefit, 0}) // No se duplico el lado
+		//lista = append(lista, Edge{edge.start, edge.end, edge.cost, 0, 0})
 	}
 	sort.Sort(sort.Reverse(lista))
 	for _, edge := range lista {
@@ -33,12 +42,9 @@ func (g *Graph) obtenerListaSucesores(v int) []*Edge {
 	return newlist
 }
 
-func (g *Graph) cumpleAcotamiento(e *Edge, solParcial []*Edge, mejorSol []*Edge, beneficioDisponible int) bool {
+func (g *Graph) cumpleAcotamiento(e *Edge, solParcial []*Edge) bool {
 	beneficioE := g.NetBenefit(e.start, e.end)
-	//fmt.Println(e, "Beneficio E: ", beneficioE)
 	beneficioSolParcial := getPathBenefit(solParcial) + beneficioE
-	//fmt.Println(mejorSol)
-	//fmt.Println("SolParcialBenefit", beneficioSolParcial, "beneficioMejor:", getPathBenefit(mejorSol))
 	maxBeneficio := beneficioDisponible - int(math.Max(0, float64(beneficioE))) + beneficioSolParcial
 	if maxBeneficio <= getPathBenefit(mejorSol) {
 		return false
@@ -59,23 +65,17 @@ func (g *Graph) branchAndBound(v int) {
 			for _, elem := range solParcial {
 				mejorSol = append(mejorSol, elem)
 			}
-			fmt.Println("nueva mejor sol: ", mejorSol)
 		}
 	}
-	//fmt.Println(mejorSol)
 	sucesores := g.obtenerListaSucesores(v)
 	estaSolParcial, cumpleAco, cicloNeg := true, true, true
-	fmt.Print("solParcial: ", solParcial, " benef: ", getPathBenefit(solParcial))
-	//fmt.Println(" sucesores: ", sucesores)
-	fmt.Println(" Benef mejorSol: ", getPathBenefit(mejorSol))
 	for _, edge := range sucesores {
 		estaSolParcial = estaEnSolucionParcial(edge, solParcial)
-		cumpleAco = g.cumpleAcotamiento(edge, solParcial, mejorSol, beneficioDisponible)
+		cumpleAco = g.cumpleAcotamiento(edge, solParcial)
 		cicloNeg = checkNegativeCycle(edge, solParcial)
-		fmt.Println("nodo:", v, "lado: ", edge, "| BenefLado:", g.NetBenefit(edge.start, edge.end), "| estaSolPar:", estaSolParcial, "| cumpleAc:", cumpleAco, "| NegCycle:", cicloNeg, "| benefDisponible:", beneficioDisponible, "| cond:", !estaSolParcial && cumpleAco && !cicloNeg)
+		//fmt.Println("nodo:", v, "lado: ", edge, "| BenefLado:", g.NetBenefit(edge.start, edge.end), "| estaSolPar:", estaSolParcial, "| cumpleAc:", cumpleAco, "| NegCycle:", cicloNeg, "| benefDisponible:", beneficioDisponible, "| cond:", !estaSolParcial && cumpleAco && !cicloNeg)
 
 		if !estaSolParcial && cumpleAco && !cicloNeg {
-			fmt.Println()
 			solParcial = append(solParcial, edge)
 			beneficioDisponible = beneficioDisponible - int(math.Max(0, float64(g.NetBenefit(edge.start, edge.end))))
 			g.AddOcurr(edge.start, edge.end)
@@ -84,11 +84,9 @@ func (g *Graph) branchAndBound(v int) {
 		}
 	}
 	if len(solParcial) > 0 {
-		fmt.Println("solParcial: ", solParcial)
 		ultimo := solParcial[len(solParcial)-1]
 		solParcial = solParcial[:len(solParcial)-1] // edge = eliminarUltimoLado(solParcial)
 		g.RemoveOcurr(ultimo.start, ultimo.end)
-		fmt.Println("Return Quitar ultimo:", ultimo, "ocurr:", ultimo.ocurr, "netB:", g.NetBenefit(ultimo.start, ultimo.end))
 		beneficioDisponible = beneficioDisponible + int(math.Max(0, float64(g.NetBenefit(ultimo.start, ultimo.end))))
 		g.AddOcurr(ultimo.start, ultimo.end)
 	}

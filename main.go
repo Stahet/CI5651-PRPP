@@ -8,21 +8,21 @@ import (
 	"strings"
 )
 
+// Global variables
 var mejorSol []*Edge
 var beneficioDisponible int
 var solParcial []*Edge
 
 func main() {
 
-	file, _ := os.Open("./instanciasPRPP/CHRISTOFIDES/P11NoRPP")
+	//file, _ := os.Open("./instanciasPRPP/CHRISTOFIDES/P14NoRPP")
 	//file, _ := os.Open("./instanciasPRPP/RANDOM/R9NoRPP")
-	//file, _ := os.Open("./instanciasPRPP/DEGREE/D2NoRPP")
+	file, _ := os.Open("./instanciasPRPP/DEGREE/D2NoRPP")
 	//file, _ := os.Open("./instanciasPRPP/GRID/G16NoRPP")
 	lineScanner := bufio.NewScanner(file)
 	line := 0
 	g := NewGraph(1)
 	maxBenefit, b, c := 0, 0, 0
-	// branchG := NewGraph(1)
 	for lineScanner.Scan() {
 		contents := strings.Fields(lineScanner.Text())
 		if line == 0 {
@@ -44,23 +44,15 @@ func main() {
 		line++
 	}
 	var path []*Edge
-	path = getCycleGRASP(g)
-
-	fmt.Println("Ciclo Greedy: ", path)
-	fmt.Println("Total: ", getPathBenefit(path))
-
-	path = removeNegativeCycle(g, path)
-	fmt.Println("Nuevo ciclo sin negativo: ", path)
-	fmt.Println("Total: ", getPathBenefit(path))
-
-	mejorSol = make([]*Edge, 0) // Global variable bestPath
+	path = getCycleGRASP(g)             // Get Greedy initial Path
+	path = removeNegativeCycle(g, path) // Remove Negative Cycle
+	mejorSol = make([]*Edge, 0)         // Global variable bestPath
+	// Copy path to new array
 	for _, elem := range path {
 		mejorSol = append(mejorSol, elem)
 	}
 	beneficioDisponible = maxBenefit // Global variable maxBenefit
-
 	g.branchAndBound(1)
 	fmt.Println("Ciclo Branch and bound: ", mejorSol)
 	fmt.Println("Total: ", getPathBenefit(mejorSol))
-	// fmt.Println(g.obtenerListaSucesores(1))
 }

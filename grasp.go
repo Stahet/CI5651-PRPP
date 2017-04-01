@@ -1,7 +1,7 @@
 package main
 
 import (
-	"fmt"
+	//"fmt"
 	"math"
 	"math/rand"
 	"time"
@@ -13,12 +13,10 @@ import (
 func removeNegativeCycle(g *Graph, path []*Edge) []*Edge {
 	start, end := 0, 0
 	for i := 0; i < len(path); i++ {
-		//fmt.Println("i=", i, "edge: ", path[i])
 		start = path[i].start
 		for j := i + 1; j < len(path); j++ {
 			end = path[j].end
 			if start == end {
-				//fmt.Println("i,j=", i, j)
 				if getPathBenefit(path[i:j]) <= 0 {
 					path = append(path[:i], path[j+1:]...)
 					i = i - 1
@@ -34,8 +32,6 @@ func removeNegativeCycle(g *Graph, path []*Edge) []*Edge {
 func getCycleGRASP(g *Graph) []*Edge {
 	var path []*Edge
 	var initialEdge *Edge
-	fmt.Println("Imprimiendo grafo\n", g)
-	fmt.Println("Lados positivos", g.positiveEdges)
 
 	pEdges := g.positiveEdges
 	// Check if deposit (1) in T
@@ -142,14 +138,12 @@ func getEdge(positiveEdges []*Edge, b int) int {
 func getPath(ccm [][]*Edge) []*Edge {
 	var total int
 	pathCost := make([]int, len(ccm)) // Create array of path cost
-	//fmt.Println("caminos")
 	for index, path := range ccm {
 		total = 0
 		for _, edge := range path {
 			total = total + edge.benefit - edge.cost
 		}
 		pathCost[index] = total
-		//fmt.Println(path, "Cost: ", total)
 	}
 
 	// Because there is a possibility to get a negative total cost
