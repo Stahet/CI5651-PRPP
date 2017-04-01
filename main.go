@@ -67,7 +67,7 @@ func main() {
 		mejorSol = append(mejorSol, elem)
 	}
 	beneficioDisponible = maxBenefit // Global variable maxBenefit
-	_ = time.AfterFunc(time.Duration(90)*time.Minute, func() {
+	_ = time.AfterFunc(time.Duration(120)*time.Minute, func() {
 		fmt.Println("Archivo: ", args[1])
 		fmt.Println("Tiempo limite excedido")
 		buf := bufio.NewReader(os.Stdin)
