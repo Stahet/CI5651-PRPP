@@ -80,7 +80,7 @@ func main() {
 	defer salida.Close()
 	stringValue := strconv.Itoa(getPathBenefit(mejorSol))
 	stringPath := []string{}
-	//stringTime := ending.String()
+	stringTime := ending.String()
 	_, err = salida.WriteString(stringValue)
 	check(err)
 	_, err = salida.WriteString("\n")
@@ -102,11 +102,11 @@ func main() {
 	if optimalValue != 0 {
 		heuristicDeviation = float64(100 * (float64(optimalValue) - float64(branchValue)) / float64(optimalValue))
 	}
-	//_, err = salida.WriteString(strconv.FormatInt(int64(heuristicDeviation), 10))
+	_, err = salida.WriteString(strconv.FormatFloat(heuristicDeviation, 'f', 2, 32))
 	check(err)
-	//_, err = salida.WriteString("\n")
+	_, err = salida.WriteString("%\n")
 	check(err)
-	//_, err = salida.WriteString(stringTime)
+	_, err = salida.WriteString(stringTime)
 	check(err)
 	salida.Sync()
 	fmt.Println("Archivo: ", args[1])
