@@ -37,7 +37,8 @@ func (g *Graph) cumpleAcotamiento(e *Edge, solParcial []*Edge, mejorSol []*Edge,
 	beneficioE := g.NetBenefit(e.start, e.end)
 	//fmt.Println(e, "Beneficio E: ", beneficioE)
 	beneficioSolParcial := getPathBenefit(solParcial) + beneficioE
-	fmt.Println("SolParcialBenefit", beneficioSolParcial, "beneficioMejor:", getPathBenefit(mejorSol))
+	//fmt.Println(mejorSol)
+	//fmt.Println("SolParcialBenefit", beneficioSolParcial, "beneficioMejor:", getPathBenefit(mejorSol))
 	maxBeneficio := beneficioDisponible - int(math.Max(0, float64(beneficioE))) + beneficioSolParcial
 	if maxBeneficio <= getPathBenefit(mejorSol) {
 		return false
@@ -45,29 +46,44 @@ func (g *Graph) cumpleAcotamiento(e *Edge, solParcial []*Edge, mejorSol []*Edge,
 	return true
 }
 
-func (g *Graph) branchAndBound(e int, solParcial []*Edge, mejorSol []*Edge, beneficioDisponible int) ([]*Edge, []*Edge, int) {
-	if e == 1 {
+// Global variables defined in Main
+// var mejorSol []*Edge
+// var beneficioDisponible int
+// var solParcial []*Edge
+//
+//
+func (g *Graph) branchAndBound() {
+	v := 1
+	if len(solParcial) > 0 {
+		v = solParcial[len(solParcial)-1].end
+	}
+	if v == 1 {
 		if getPathBenefit(solParcial) > getPathBenefit(mejorSol) {
-			mejorSol = solParcial
+			mejorSol = make([]*Edge, 0)
+			for _, elem := range solParcial {
+				mejorSol = append(mejorSol, elem)
+			}
+			fmt.Println("nueva mejor sol: ", mejorSol)
 		}
 	}
 	//fmt.Println(mejorSol)
-	sucesores := g.obtenerListaSucesores(e)
+	sucesores := g.obtenerListaSucesores(v)
 	estaSolParcial, cumpleAco, cicloNeg := true, true, true
-	fmt.Print("solParcial: ", solParcial, "benef:", getPathBenefit(solParcial))
-	fmt.Println("sucesores: ", sucesores)
+	fmt.Print("solParcial: ", solParcial, " benef: ", getPathBenefit(solParcial))
+	//fmt.Println(" sucesores: ", sucesores)
+	fmt.Println(" Benef mejorSol: ", getPathBenefit(mejorSol))
 	for _, edge := range sucesores {
 		estaSolParcial = estaEnSolucionParcial(edge, solParcial)
 		cumpleAco = g.cumpleAcotamiento(edge, solParcial, mejorSol, beneficioDisponible)
 		cicloNeg = checkNegativeCycle(edge, solParcial)
-		fmt.Println("nodo:", e, "lado: ", edge, "| netB:", g.NetBenefit(edge.start, edge.end), "| estaSolPar:", estaSolParcial, "| cumpleAc:", cumpleAco, "| NegCycle:", cicloNeg, "| benefDisponible:", beneficioDisponible, "| cond:", !estaSolParcial && cumpleAco && !cicloNeg)
+		fmt.Println("nodo:", v, "lado: ", edge, "| BenefLado:", g.NetBenefit(edge.start, edge.end), "| estaSolPar:", estaSolParcial, "| cumpleAc:", cumpleAco, "| NegCycle:", cicloNeg, "| benefDisponible:", beneficioDisponible, "| cond:", !estaSolParcial && cumpleAco && !cicloNeg)
 
 		if !estaSolParcial && cumpleAco && !cicloNeg {
 			fmt.Println()
 			solParcial = append(solParcial, edge)
 			beneficioDisponible = beneficioDisponible - int(math.Max(0, float64(g.NetBenefit(edge.start, edge.end))))
 			g.AddOcurr(edge.start, edge.end)
-			solParcial, mejorSol, beneficioDisponible = g.branchAndBound(edge.end, solParcial, mejorSol, beneficioDisponible)
+			g.branchAndBound()
 			g.RemoveOcurr(edge.start, edge.end)
 		}
 	}
@@ -80,32 +96,41 @@ func (g *Graph) branchAndBound(e int, solParcial []*Edge, mejorSol []*Edge, bene
 		beneficioDisponible = beneficioDisponible + int(math.Max(0, float64(g.NetBenefit(ultimo.start, ultimo.end))))
 		g.AddOcurr(ultimo.start, ultimo.end)
 	}
-	return solParcial, mejorSol, beneficioDisponible
 }
 
 // Get path total benefit
 func getPathBenefit(path []*Edge) int {
-	seen := make(map[int]int)
+	seen := make(map[int]map[int]bool)
 	total := 0
 	for _, edge := range path {
-		if _, ok := seen[edge.start]; ok && (edge.end == seen[edge.start] || edge.start == seen[edge.end]) {
-			total = total - edge.cost
+		if len(seen[edge.start]) != 0 {
+			if seen[edge.start][edge.end] {
+				total = total - edge.cost
+			} else {
+				total = total + edge.benefit - edge.cost
+			}
+
 		} else {
 			total = total + edge.benefit - edge.cost
-			seen[edge.start] = edge.end
-			seen[edge.end] = edge.start
+			seen[edge.start] = make(map[int]bool)
 		}
+		if len(seen[edge.end]) == 0 {
+			seen[edge.end] = make(map[int]bool)
+		}
+		seen[edge.start][edge.end] = true
+		seen[edge.end][edge.start] = true
 	}
+	fmt.Println("camino: ", path, "benef: ", total)
 	return total
 }
 
 func checkNegativeCycle(e *Edge, solParcial []*Edge) bool {
 	path := append(solParcial, e)
-	totalBenefit := 0
+	var total int
 	for index, edge := range solParcial {
 		if edge.start == e.end {
-			totalBenefit = getPathBenefit(path[index:])
-			if totalBenefit < 0 {
+			total = getPathBenefit(path[index:])
+			if total < 0 {
 				return true
 			}
 		}

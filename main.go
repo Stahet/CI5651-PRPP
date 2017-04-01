@@ -8,11 +8,9 @@ import (
 	"strings"
 )
 
-var path []*Edge
 var mejorSol []*Edge
 var beneficioDisponible int
 var solParcial []*Edge
-var totalBenefit int
 
 func main() {
 
@@ -45,7 +43,7 @@ func main() {
 		}
 		line++
 	}
-
+	var path []*Edge
 	path = getCycleGRASP(g)
 
 	fmt.Println("Ciclo Greedy: ", path)
@@ -55,10 +53,14 @@ func main() {
 	fmt.Println("Nuevo ciclo sin negativo: ", path)
 	fmt.Println("Total: ", getPathBenefit(path))
 
-	var branchSol []*Edge
-	branchSol = make([]*Edge, 0, 0)
-	_, branchSol, _ = g.branchAndBound(1, branchSol, path, maxBenefit)
-	fmt.Println("Ciclo Branch and bound: ", branchSol)
-	fmt.Println("Total: ", getPathBenefit(branchSol))
+	mejorSol = make([]*Edge, 0) // Global variable bestPath
+	for _, elem := range path {
+		mejorSol = append(mejorSol, elem)
+	}
+	beneficioDisponible = maxBenefit // Global variable maxBenefit
+
+	g.branchAndBound()
+	fmt.Println("Ciclo Branch and bound: ", mejorSol)
+	fmt.Println("Total: ", getPathBenefit(mejorSol))
 	// fmt.Println(g.obtenerListaSucesores(1))
 }
