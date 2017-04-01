@@ -1,3 +1,12 @@
+/**
+ * grasp.go
+ *
+ * Implementation Greedy algoritm based in GRASP to solve the PRPP problem
+ *
+ * Author : Jonnathan Ng
+ *          Daniel Rodriguez
+ */
+
 package main
 
 import (

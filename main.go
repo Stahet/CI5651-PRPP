@@ -1,3 +1,12 @@
+/**
+ * main.go
+ *
+ * Main program to solve the PRPP problem using Branch and Bound algorithm
+ * We use a GRASP based algorithm to get a initial solution
+ *
+ * Author : Jonnathan Ng
+ *          Daniel Rodriguez
+ */
 package main
 
 import (
@@ -30,10 +39,6 @@ func main() {
 	beginning := time.Now()
 	args := os.Args
 	file, _ := os.Open(args[1])
-	// file, _ := os.Open("./instanciasPRPP/CHRISTOFIDES/P01NoRPP")
-	//file, _ := os.Open("./instanciasPRPP/RANDOM/R9NoRPP")
-	// file, _ := os.Open("./instanciasPRPP/DEGREE/D2NoRPP")
-	//file, _ := os.Open("./instanciasPRPP/GRID/G16NoRPP")
 	lineScanner := bufio.NewScanner(file)
 	line := 0
 	g := NewGraph(1)
@@ -59,30 +64,22 @@ func main() {
 		line++
 	}
 	var path []*Edge
-	path = getCycleGRASP(g)             // Get Greedy initial Path
-	path = removeNegativeCycle(g, path) // Remove Negative Cycle
-	mejorSol = make([]*Edge, 0)         // Global variable bestPath
+	path = getCycleGRASP(g)                // Get Greedy GRASP algorithm initial Path
+	path = removeNegativeCycle(g, path)    // Remove Negative Cycle
+	mejorSol = make([]*Edge, 0)            // Global variable bestPath
 	// Copy path to new array
 	for _, elem := range path {
 		mejorSol = append(mejorSol, elem)
 	}
-	beneficioDisponible = maxBenefit // Global variable maxBenefit
+	beneficioDisponible = maxBenefit        // Global variable maxBenefit
 	_ = time.AfterFunc(time.Duration(120)*time.Minute, func() {
 		fmt.Println("Archivo: ", args[1])
 		fmt.Println("Tiempo limite excedido")
 		os.Exit(2)
-		// buf := bufio.NewReader(os.Stdin)
-		// fmt.Print("Desea continuar la busqueda? Y/n")
-		// sentence, err := buf.ReadBytes('\n')
-		// if err != nil {
-		// 	fmt.Println(err)
-		// } else if sentence == 'N' {
-		// 	os.Exit(2)
-		// }
 	})
-	g.branchAndBound(1)
+	g.branchAndBound(1)                     // Begin Branch and Bound Algorithm
 	ending := time.Since(beginning)
-	branchValue := getPathBenefit(mejorSol)
+	branchValue := getPathBenefit(mejorSol) // Get Path total 
 
 	salida, err := os.Create(args[1] + "-salida.txt")
 	check(err)
@@ -118,6 +115,7 @@ func main() {
 	_, err = salida.WriteString(stringTime)
 	check(err)
 	salida.Sync()
+	
 	fmt.Println("Archivo: ", args[1])
 	fmt.Println("Ciclo Branch and bound: ", mejorSol)
 	fmt.Println("Total: ", branchValue)

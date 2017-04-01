@@ -1,24 +1,48 @@
-﻿Proyecto 1 
+﻿Proyecto 2 
 Diseño de Algoritmos I CI-5651
+
+Diseño de un algoritmo para la resolucion del PRPP, basado en la tecnica de 
+Branch and Bound
 Autores: Jonnathan Ng
          Daniel Rodriguez
 
 Instrucciones: 
 
-Para compilar es necesario tener instalado el paquete o compilador de Golang. 
-Este se puede conseguir instalar desde la pagina https://golang.org/dl/. Una vez 
-instalado puede proceder la compilación y ejecución del programa.
+   Para compilar es necesario tener instalado el paquete o compilador de Golang. 
+Este se puede conseguir en la pagina https://golang.org/dl/. Una vez 
+instalado puede proceder a la compilación y ejecución del programa.
 
 Compilacion:
-Debe situarse dentro de la carpeta del proyecto, entonces debe ejecutar:
+    Debe situarse dentro de la carpeta del proyecto, entonces debe ejecutar:
 
-go build main.go graph.go grasp.go branchbound.go
+    go build main.go graph.go grasp.go branchbound.go
 
-Esto generara un ejecutable llamado main.exe en Windows o main para
-sistemas UNIX
+    Esto generara un ejecutable llamado main.exe en Windows o main para
+sistemas UNIX.
 
 Ejecucion:
-Para la ejecucion debe situarse dentro del lugar donde tenga el ejecutable
-creado, entonces ejecute el comando
+    Para la ejecucion debe situarse dentro del lugar donde tenga el ejecutable
+creado, entonces ejecute el comando:
 
-<<>> Dar mas instrucciones
+    ./main <nombre_archivo> <valor_optimo_sol>    en UNIX
+    main.exe <nombre_archivo> <valor_optimo_sol>  en Windows
+
+Archivos de salida:
+    Una ejecutado el algoritmo, se mostrara en pantalla el % de desviacion y 
+el ciclo generado por el algoritmo. Ademas tambien se genera un archivo 
+con el nombre <nombrearchivo>-salida.txt con los resultados y el ciclo generado.
+
+Ejecucion de un conjunto de pruebas:
+    Una vez compilado el programa puede proceder a la ejecucion secuencial
+de un conjunto de pruebas (solamente Windows). Debe situarse en la carpeta 
+principal del programa, compilarlo y ejecutar el comando desde la consola:
+
+    <nombre-conjunto>.bat 
+
+    Actualmente existen 4 conjuntos de pruebas, junto a los valores optimos 
+correspondientes en los archivos:
+
+CHRISTOFIDES.bat
+GRID.bat
+DEGREE.bat
+RANDOM.bat

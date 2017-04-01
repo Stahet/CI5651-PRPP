@@ -124,14 +124,6 @@ func (g *Graph) RemoveOcurr(start, end int) {
 	g.edges[end][start].ocurr = g.edges[end][start].ocurr - 1
 }
 
-func (g *Graph) ResetOcurr() {
-	for _, v := range g.edges {
-		for _, edge := range v {
-			edge.ocurr = 0
-		}
-	}
-}
-
 // Dijkstra algorithm
 func (g *Graph) Dijkstra(source int, to int, path []*Edge) []*Edge {
 	// Create map to track distances from source vertex
@@ -182,6 +174,7 @@ func (g *Graph) reconstructPath(from int, to int, prev []int) []*Edge {
 	return path
 }
 
+// Cost function for GRASP Algorithm
 func costMinimumPath(edge *Edge, path []*Edge) int {
 	for _, elem := range path {
 		if edge.equals(elem) {
@@ -220,5 +213,4 @@ func (g *Graph) NetBenefit(start, end int) int {
 		return edge.benefit - edge.cost
 	}
 	return -edge.cost
-
 }
