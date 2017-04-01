@@ -59,7 +59,7 @@ func main() {
 	}
 	beneficioDisponible = maxBenefit // Global variable maxBenefit
 
-	g.branchAndBound()
+	g.branchAndBound(1)
 	fmt.Println("Ciclo Branch and bound: ", mejorSol)
 	fmt.Println("Total: ", getPathBenefit(mejorSol))
 	// fmt.Println(g.obtenerListaSucesores(1))

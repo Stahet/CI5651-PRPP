@@ -52,11 +52,7 @@ func (g *Graph) cumpleAcotamiento(e *Edge, solParcial []*Edge, mejorSol []*Edge,
 // var solParcial []*Edge
 //
 //
-func (g *Graph) branchAndBound() {
-	v := 1
-	if len(solParcial) > 0 {
-		v = solParcial[len(solParcial)-1].end
-	}
+func (g *Graph) branchAndBound(v int) {
 	if v == 1 {
 		if getPathBenefit(solParcial) > getPathBenefit(mejorSol) {
 			mejorSol = make([]*Edge, 0)
@@ -83,7 +79,7 @@ func (g *Graph) branchAndBound() {
 			solParcial = append(solParcial, edge)
 			beneficioDisponible = beneficioDisponible - int(math.Max(0, float64(g.NetBenefit(edge.start, edge.end))))
 			g.AddOcurr(edge.start, edge.end)
-			g.branchAndBound()
+			g.branchAndBound(edge.end)
 			g.RemoveOcurr(edge.start, edge.end)
 		}
 	}
@@ -120,7 +116,6 @@ func getPathBenefit(path []*Edge) int {
 		seen[edge.start][edge.end] = true
 		seen[edge.end][edge.start] = true
 	}
-	fmt.Println("camino: ", path, "benef: ", total)
 	return total
 }
 
