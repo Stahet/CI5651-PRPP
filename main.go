@@ -80,7 +80,7 @@ func main() {
 	defer salida.Close()
 	stringValue := strconv.Itoa(getPathBenefit(mejorSol))
 	stringPath := []string{}
-	stringTime := ending.String()
+	//stringTime := ending.String()
 	_, err = salida.WriteString(stringValue)
 	check(err)
 	_, err = salida.WriteString("\n")
@@ -92,21 +92,26 @@ func main() {
 		stringPath = append(stringPath, text)
 	}
 	result := strings.Join(stringPath, " ")
+	result = "d " + result + " d"
 	_, err = salida.WriteString(result)
 	check(err)
 	_, err = salida.WriteString("\n")
 	check(err)
-	optimalValue, _ := strconv.ParseInt(args[2], 10, 32)
-	heuristicDeviation := 100 * ((int(optimalValue) - branchValue) / int(optimalValue))
-	_, err = salida.WriteString(strconv.FormatInt(int64(heuristicDeviation), 10))
+	optimalValue, _ := strconv.ParseInt(args[2], 0, 0)
+	var heuristicDeviation float64
+	if optimalValue != 0 {
+		heuristicDeviation = float64(100 * (float64(optimalValue) - float64(branchValue)) / float64(optimalValue))
+	}
+	//_, err = salida.WriteString(strconv.FormatInt(int64(heuristicDeviation), 10))
 	check(err)
-	_, err = salida.WriteString("\n")
+	//_, err = salida.WriteString("\n")
 	check(err)
-	_, err = salida.WriteString(stringTime)
+	//_, err = salida.WriteString(stringTime)
 	check(err)
 	salida.Sync()
-
+	fmt.Println("Archivo: ", args[1])
 	fmt.Println("Ciclo Branch and bound: ", mejorSol)
 	fmt.Println("Total: ", branchValue)
 	fmt.Println("Tiempo: ", ending)
+	fmt.Printf("Desviacion: %.2f %%", heuristicDeviation)
 }
