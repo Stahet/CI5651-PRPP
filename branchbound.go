@@ -57,7 +57,6 @@ func (g *Graph) cumpleAcotamiento(e *Edge, solParcial []*Edge) bool {
 // var beneficioDisponible int
 // var solParcial []*Edge
 //
-//
 func (g *Graph) branchAndBound(v int) {
 	if v == 1 {
 		if getPathBenefit(solParcial) > getPathBenefit(mejorSol) {
@@ -68,14 +67,14 @@ func (g *Graph) branchAndBound(v int) {
 		}
 	}
 	sucesores := g.obtenerListaSucesores(v)
-	estaSolParcial, cumpleAco, cicloNeg := true, true, true
+	//estaSolParcial, cumpleAco, cicloNeg := true, true, true
 	for _, edge := range sucesores {
-		estaSolParcial = estaEnSolucionParcial(edge, solParcial)
-		cumpleAco = g.cumpleAcotamiento(edge, solParcial)
-		cicloNeg = checkNegativeCycle(edge, solParcial)
+		//estaSolParcial = estaEnSolucionParcial(edge, solParcial)
+		//cumpleAco = g.cumpleAcotamiento(edge, solParcial)
+		//cicloNeg = checkNegativeCycle(edge, solParcial)
 		//fmt.Println("nodo:", v, "lado: ", edge, "| BenefLado:", g.NetBenefit(edge.start, edge.end), "| estaSolPar:", estaSolParcial, "| cumpleAc:", cumpleAco, "| NegCycle:", cicloNeg, "| benefDisponible:", beneficioDisponible, "| cond:", !estaSolParcial && cumpleAco && !cicloNeg)
 
-		if !estaSolParcial && cumpleAco && !cicloNeg {
+		if !estaEnSolucionParcial(edge, solParcial) && g.cumpleAcotamiento(edge, solParcial) && !checkNegativeCycle(edge, solParcial) {
 			solParcial = append(solParcial, edge)
 			beneficioDisponible = beneficioDisponible - int(math.Max(0, float64(g.NetBenefit(edge.start, edge.end))))
 			g.AddOcurr(edge.start, edge.end)

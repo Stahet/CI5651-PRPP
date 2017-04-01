@@ -70,14 +70,15 @@ func main() {
 	_ = time.AfterFunc(time.Duration(120)*time.Minute, func() {
 		fmt.Println("Archivo: ", args[1])
 		fmt.Println("Tiempo limite excedido")
-		buf := bufio.NewReader(os.Stdin)
-		fmt.Print("Desea continuar la busqueda? Y/n")
-		sentence, err := buf.ReadBytes('\n')
-		if err != nil {
-			fmt.Println(err)
-		} else if sentence == 'N' {
-			os.Exit(2)
-		}
+		os.Exit(2)
+		// buf := bufio.NewReader(os.Stdin)
+		// fmt.Print("Desea continuar la busqueda? Y/n")
+		// sentence, err := buf.ReadBytes('\n')
+		// if err != nil {
+		// 	fmt.Println(err)
+		// } else if sentence == 'N' {
+		// 	os.Exit(2)
+		// }
 	})
 	g.branchAndBound(1)
 	ending := time.Since(beginning)
