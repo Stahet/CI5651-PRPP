@@ -6,6 +6,7 @@ import (
 	"os"
 	"strconv"
 	"strings"
+	"time"
 )
 
 // Global variables
@@ -13,11 +14,25 @@ var mejorSol []*Edge
 var beneficioDisponible int
 var solParcial []*Edge
 
+func check(e error) {
+	if e != nil {
+		panic(e)
+	}
+}
+
 func main() {
 
-	//file, _ := os.Open("./instanciasPRPP/CHRISTOFIDES/P14NoRPP")
+	if len(os.Args) <= 2 {
+		fmt.Println("Para ejecutar ./main <nombre-archivo> <valor-optimo>")
+		return
+	}
+
+	beginning := time.Now()
+	args := os.Args
+	file, _ := os.Open(args[1])
+	// file, _ := os.Open("./instanciasPRPP/CHRISTOFIDES/P01NoRPP")
 	//file, _ := os.Open("./instanciasPRPP/RANDOM/R9NoRPP")
-	file, _ := os.Open("./instanciasPRPP/DEGREE/D2NoRPP")
+	// file, _ := os.Open("./instanciasPRPP/DEGREE/D2NoRPP")
 	//file, _ := os.Open("./instanciasPRPP/GRID/G16NoRPP")
 	lineScanner := bufio.NewScanner(file)
 	line := 0
@@ -52,7 +67,46 @@ func main() {
 		mejorSol = append(mejorSol, elem)
 	}
 	beneficioDisponible = maxBenefit // Global variable maxBenefit
+	_ = time.AfterFunc(time.Duration(90)*time.Minute, func() {
+		fmt.Println("Tiempo limite excedido")
+		os.Exit(2)
+	})
 	g.branchAndBound(1)
+	ending := time.Since(beginning)
+	branchValue := getPathBenefit(mejorSol)
+
+	salida, err := os.Create(args[1] + "-salida.txt")
+	check(err)
+	defer salida.Close()
+	stringValue := strconv.Itoa(getPathBenefit(mejorSol))
+	stringPath := []string{}
+	stringTime := ending.String()
+	_, err = salida.WriteString(stringValue)
+	check(err)
+	_, err = salida.WriteString("\n")
+	check(err)
+	stringPath = append(stringPath, strconv.Itoa(1))
+	for _, edge := range mejorSol {
+		number := edge.end
+		text := strconv.Itoa(number)
+		stringPath = append(stringPath, text)
+	}
+	result := strings.Join(stringPath, " ")
+	_, err = salida.WriteString(result)
+	check(err)
+	_, err = salida.WriteString("\n")
+	check(err)
+	optimalValue, _ := strconv.ParseInt(args[2], 10, 32)
+	heuristicDeviation := 100 * ((int(optimalValue) - branchValue) / int(optimalValue))
+	_, err = salida.WriteString(strconv.FormatInt(int64(heuristicDeviation), 10))
+	check(err)
+	_, err = salida.WriteString("\n")
+	check(err)
+	_, err = salida.WriteString(stringTime)
+	check(err)
+	salida.Sync()
+
 	fmt.Println("Ciclo Branch and bound: ", mejorSol)
-	fmt.Println("Total: ", getPathBenefit(mejorSol))
+	fmt.Println("Total: ", branchValue)
+	fmt.Println("Tiempo: ", ending)
 }
