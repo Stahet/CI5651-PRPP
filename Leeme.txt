@@ -28,6 +28,7 @@ creado, entonces ejecute el comando:
     main.exe <nombre_archivo> <valor_optimo_sol>  en Windows
 
 Archivos de salida:
+
     Una ejecutado el algoritmo, se mostrara en pantalla el % de desviacion y 
 el ciclo generado por el algoritmo. Ademas tambien se genera un archivo 
 con el nombre <nombrearchivo>-salida.txt con los resultados y el ciclo generado.
@@ -46,3 +47,7 @@ CHRISTOFIDES.bat
 GRID.bat
 DEGREE.bat
 RANDOM.bat
+
+Resultados:
+En la carpeta de /resultados pueden encontrarse la lista de ciclos generados
+junto al tiempo y la desviacion de las pruebas realizadas para cada conjunto
