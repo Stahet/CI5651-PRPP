@@ -48,6 +48,14 @@ GRID.bat
 DEGREE.bat
 RANDOM.bat
 
+    Por limitaciones con el cliente de correo GMail, los archivos .bat no pueden
+ser agregados, sin embargo pueden ser descargados desde el link del repositorio
+junto con el proyecto entero
+
+Enlace al Repositorio:
+
+https://github.com/Stahet/CI5651-PRPP
+
 Resultados:
 En la carpeta de /resultados pueden encontrarse la lista de ciclos generados
 junto al tiempo y la desviacion de las pruebas realizadas para cada conjunto
